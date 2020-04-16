@@ -1,0 +1,33 @@
+<html>
+    <head>
+       <script>
+        const API_URL = '/getSum'
+
+        const handleResponse = ({ target }) => {
+        // Do something useful here...
+        document.getElementById('answer').value = JSON.parse(target.responseText).ans;
+        }
+
+        const calculate = () => {
+            const xhr = new XMLHttpRequest()
+            const data = new FormData()
+            sendData = {
+                    first: document.getElementById('first').value,
+                    second: document.getElementById('second').value
+                };
+            data.append('data', JSON.stringify(sendData));
+            xhr.addEventListener('load', handleResponse)
+            xhr.open('POST', API_URL)
+            xhr.send(data)
+        }
+
+        </script> 
+    </head>
+    <body>
+        Enter the First number : <input id="first"> <br>
+        Enter the Second number: <input id="second">
+        <br>
+        <button onclick="calculate()">Add</button> <br>
+        <input id="answer">
+    </body>
+</html>
