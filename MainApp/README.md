@@ -19,11 +19,11 @@ I've provided a txt file containing the database data.
 	
 	Windows:  
 	```
-		venv\Scripts\activate
+	venv\Scripts\activate
 	```
 	Linux:	
 	```
-		source venv/Scripts/activate
+	source venv/Scripts/activate
 	```
 4. Your pwd would slightly change
 5. Install the dependencies
@@ -54,15 +54,16 @@ I've provided a txt file containing the database data.
 2. Go to the file app/__init__.py and change the username, password, and database name
 3. Activate the virtual environment
 4. Set Flask Options:
+	
 	Windows : 
 	```
-		set FLASK_APP=app
-		set FLASK_ENV=development
+	set FLASK_APP=app
+	set FLASK_ENV=development
 	```
 	Linux :   
 	```
-		export FLASK_APP=app
-		export FLASK_ENV=development
+	export FLASK_APP=app
+	export FLASK_ENV=development
 	```
 5. Run the App:
 	```
