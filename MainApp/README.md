@@ -15,11 +15,11 @@ I've provided a txt file containing the database data.
 	python3 -m venv venv
 	```
 3. Activate the virtual environment
-	>Windows:  
+	Windows:  
 	```
 		venv\Scripts\activate
 	```
-	>Linux:	
+	Linux:	
 	```
 		source venv/Scripts/activate
 	```
@@ -52,12 +52,12 @@ I've provided a txt file containing the database data.
 2. Go to the file app/__init__.py and change the username, password, and database name
 3. Activate the virtual environment
 4. Set Flask Options:
-	>Windows : 
+	Windows : 
 	```
 		set FLASK_APP=app
 		set FLASK_ENV=development
 	```
-	>Linux :   
+	Linux :   
 	```
 		export FLASK_APP=app
 		export FLASK_ENV=development
