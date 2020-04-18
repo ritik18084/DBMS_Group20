@@ -75,4 +75,4 @@ I've provided a txt file containing the database data.
 
 ## Dependencies
 - Flask
-- mysql
+- mysql-connector
