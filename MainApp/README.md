@@ -7,6 +7,7 @@ I've provided a txt file containing the database data.
 ## Setup:
 1. Open cmd/terminal in the same folder where the app folder is located
 2. Create a vritual environment using the command 
+
 	```
 	python -m venv venv 
 	```
@@ -15,6 +16,7 @@ I've provided a txt file containing the database data.
 	python3 -m venv venv
 	```
 3. Activate the virtual environment
+	
 	Windows:  
 	```
 		venv\Scripts\activate
