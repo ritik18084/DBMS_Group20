@@ -4,7 +4,7 @@ You would have to setup a python virtual environment to run.
 Also, to prevent the accidental change of the database create a local instance of the database.
 I've provided a txt file containing the database data.
 
-## Setup:
+## Setup
 1. Open cmd/terminal in the same folder where the app folder is located
 2. Create a vritual environment using the command 
 
@@ -49,7 +49,7 @@ I've provided a txt file containing the database data.
 4. This will create the entire database
 
 
-## How to Run:
+## How to Run
 1. Before running, set the options corresponding to your local mysql server
 2. Go to the file app/__init__.py and change the username, password, and database name
 3. Activate the virtual environment
