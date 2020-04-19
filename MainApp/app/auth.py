@@ -28,7 +28,7 @@ def login():
     if userLoggedIn():
         return redirect(url_for('main.index'))
     if validLogin(request.form['username'], request.form['password']):
-        loginUser(request.form['username'])
+        loginUser(request.form['email'])
         return redirect(url_for('main.index'))
     return redirect(url_for('auth.loginPage'))
 
@@ -40,7 +40,7 @@ def signup():
         if userExists(request.form):
             return redirect(url_for('auth.loginPage'))
         addUser(request.form)
-        loginUser(request.form['username'])
+        loginUser(request.form['email'])
         return redirect(url_for('main.index'))
     return redirect(url_for('auth.signupPage'))        
 
@@ -48,10 +48,17 @@ def signup():
 def userLoggedIn():
     return ('loggedIn' in session)
 
+def userType(type):
+    return True
 
-def loginUser(username):
+def loginUser(email):
     session['loggedIn'] = True
-    session['username'] = username
+    session['email'] = email
+    session['id'] = getUserID()
+
+
+def getUserID(email):
+    return 12345
 
 def addUser(requestForm):
     dbCursor = db.cursor()
