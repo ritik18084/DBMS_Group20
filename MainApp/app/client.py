@@ -9,7 +9,8 @@ def viewprofile():
     if not(userLoggedIn() and userType('client')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT * FROM client_database WHERE client_ID=%s"
+    sql = "SELECT client_name, client_ph, client_email, client_aadhar, \
+    client_PAN, client_DOB FROM client_database WHERE client_ID=%s"
     val = (session['id'])
     dbCursor.execute(sql, val)
     res = dbCursor.fetchone()
@@ -22,7 +23,8 @@ def viewallpolicies():
     if not(userLoggedIn() and userType('client')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT * FROM policy_database"
+    sql = "SELECT policy_name, ins_type, min_coverage, premium, eligibility_cond, \
+    terms_conditions FROM policy_database"
     dbCursor.execute(sql)
     res = dbCursor.fetchall()
     dbCursor.close()
@@ -35,7 +37,13 @@ def viewinsurances():
     dbCursor = db.cursor()
     sql = "SELECT * FROM insurance_database WHERE client_ID = %s"
     val = (session['id'])
-    dbCursor.execute(sql)
+    dbCursor.execute(sql, val)
     res = dbCursor.fetchall()
     dbCursor.close()
     return res
+
+@client.route('/boughtInsurance', methods=['POST'])
+def boughtInsurance():
+	if not(userLoggedIn() and userType('client')):
+		return
+		
