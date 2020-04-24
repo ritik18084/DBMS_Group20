@@ -12,7 +12,7 @@ a h1{
 }
 #background{
 	background: linear-gradient(270deg, rgba(5, 55, 115, 0), rgba(5, 55, 115, 1)),
-url('../images/family.jpg') no-repeat center;
+url('../images-main/family.jpg') no-repeat center;
 	background-size:cover;
 	width:100%;
 	height: 700px;
@@ -132,7 +132,7 @@ url('../images/family.jpg') no-repeat center;
 	margin-bottom: 20px;
 }
 .features-1{
-	background: url("../images/feature-1.jpg") no-repeat ;
+	background: url("../images-main/feature-1.jpg") no-repeat ;
 	height: 350px;
 	padding-left: 0px;
 	padding-right: 0px;
@@ -140,7 +140,7 @@ url('../images/family.jpg') no-repeat center;
 	margin-bottom: 20px;
 }
 .features-2{
-	background: url("../images/feature-2.jpg") no-repeat ;
+	background: url("../images-main/feature-2.jpg") no-repeat ;
 	height: 350px;
 	padding-left: 0px;
 	padding-right: 0px;
@@ -149,7 +149,7 @@ url('../images/family.jpg') no-repeat center;
 
 }
 .features-3{
-	background: url("../images/feature-3.jpg") no-repeat ;
+	background: url("../images-main/feature-3.jpg") no-repeat ;
 	height: 350px;
 	padding-left: 0px;
 	padding-right: 0px;
@@ -157,7 +157,7 @@ url('../images/family.jpg') no-repeat center;
 	margin-bottom: 20px;
 }
 .features-4{
-	background: url("../images/feature-4.jpg") no-repeat ;
+	background: url("../images-main/feature-4.jpg") no-repeat ;
 	height: 350px;
 	padding-left: 0px;
 	padding-right: 0px;
@@ -220,7 +220,7 @@ url('../images/family.jpg') no-repeat center;
 
 
 #background1{
-	background: url('../images/background-1.jpg') no-repeat center;
+	background: url('../images-main/background-1.jpg') no-repeat center;
 	background-size:cover;
 	width:100%;
 	height: 400px;
@@ -279,7 +279,7 @@ url('../images/family.jpg') no-repeat center;
 	background-color: white;
 }
 #background2{
-	background: url('../images/background-2.jpg') no-repeat center;
+	background: url('../images-main/background-2.jpg') no-repeat center;
 	background-size:cover;
 	width:100%;
 	min-height: 500px;
@@ -384,7 +384,7 @@ option:hover{
 	}
 	#background{
 		background: linear-gradient(180deg, rgba(8, 82, 200, 0), rgba(8, 82, 200, 0.8)),
-		url('../images/family-768.jpg') no-repeat center;
+		url('../images-main/family-768.jpg') no-repeat center;
 		background-size: cover
 	}
 	.table-content{
