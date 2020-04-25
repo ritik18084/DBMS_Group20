@@ -9,8 +9,8 @@ def viewsold():
     if not(userLoggedIn() and userType('agent')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT * FROM policy_database WHERE agent_ID=%s"
-    val = (session['id'])
+    sql = "SELECT ins_type FROM INSURANCE_DATABASE WHERE agent_ID=%s"
+    val = (session['id'],)
     dbCursor.execute(sql, val)
     res = dbCursor.fetchall()
     dbCursor.close()
@@ -21,10 +21,25 @@ def viewagentprofile():
     if not(userLoggedIn() and userType('agent')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT * FROM agent_database WHERE agent_ID=%s"
+    sql = "SELECT * FROM AGENT_DATABASE WHERE agent_ID=%s"
     val = (session['id'])
     dbCursor.execute(sql, val)
     res = dbCursor.fetchone()
     dbCursor.close()
     return res
 
+@agent.route('/getClientContact', methods= ['POST'])
+
+def getClientContact():
+    if not(userLoggedIn() and userType('agent'))
+        return
+    dbCursor = db.cursor()
+    sql = "SELECT client_name, client_ph, client_email \
+    FROM AGENT_DATABASE WHERE agent_ID= %s and client_ID = %s"
+    agent_ID = session['id']
+    client_ID = session['id']
+    val = (agent_ID,client_ID)
+    dbCursor.execute(sql, val)
+    res= dbCursor.fetchall()
+    dbCursor.close()
+    return res

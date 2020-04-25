@@ -28,7 +28,7 @@ def login():
     if userLoggedIn():
         return redirect(url_for('main.index'))
     if validLogin(request.form['username'], request.form['password']):
-        loginUser(request.form['email'])
+        loginUser(request.form['username'])
         return redirect(url_for('main.index'))
     return redirect(url_for('auth.loginPage'))
 
@@ -54,7 +54,7 @@ def userType(type):
 def loginUser(email):
     session['loggedIn'] = True
     session['email'] = email
-    session['id'] = getUserID()
+    session['id'] = getUserID(email)
 
 
 def getUserID(email):
@@ -62,7 +62,7 @@ def getUserID(email):
 
 def addUser(requestForm):
     dbCursor = db.cursor()
-    sql = "INSERT INTO login_database (username, password, email, phone) VALUES (%s, %s, %s, %s) "
+    sql = "INSERT INTO LOGIN_DATABASE (username, password, email, phone) VALUES (%s, %s, %s, %s) "
     val = (requestForm['username'], requestForm['password'], requestForm['email'], requestForm['phone'])
     dbCursor.execute(sql, val)
     db.commit()
@@ -70,7 +70,7 @@ def addUser(requestForm):
 
 def validLogin(username, password):
     dbCursor = db.cursor()
-    sql = "SELECT * FROM login_database WHERE username = %s AND password = %s"
+    sql = "SELECT * FROM LOGIN_DATABASE WHERE username = %s AND password = %s"
     val = (username, password)
     dbCursor.execute(sql, val)
     res = True if dbCursor.fetchone() else False
@@ -80,7 +80,7 @@ def validLogin(username, password):
 
 def userExists(requestForm):
     dbCursor = db.cursor()
-    sql = "SELECT * FROM login_database WHERE username = %s OR email = %s OR phone = %s"
+    sql = "SELECT * FROM LOGIN_DATABASE WHERE username = %s OR email = %s OR phone = %s"
     val = (requestForm['username'], requestForm['email'], requestForm['phone'])
     dbCursor.execute(sql, val)
     res = True if dbCursor.fetchone() else False
