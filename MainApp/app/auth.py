@@ -1,10 +1,16 @@
-from flask import Blueprint, session, request, redirect, url_for, render_template
+from flask import Blueprint, session, request, redirect, url_for, render_template, flash
 from . import db
 from random import randint
-
+from datetime import datetime, date
+import time
 auth = Blueprint('auth',__name__)
 
 
+def generateUID(length=12):
+    uid = str(int(time.time()))
+    while len(uid) < length:
+        uid = uid + str(randint(0,9))
+    return uid
 
 @auth.route('/login')
 def loginPage():
@@ -27,9 +33,10 @@ def logout():
 def login():
     if userLoggedIn():
         return redirect(url_for('main.index'))
-    if validLogin(request.form['username'], request.form['password']):
-        loginUser(request.form['username'])
+    if validLogin(request.form['email'], request.form['password']):
+        loginUser(request.form['email'])
         return redirect(url_for('main.index'))
+    flash('Invalid Login Credentials')
     return redirect(url_for('auth.loginPage'))
 
 @auth.route('/signup', methods= ['POST'])
@@ -39,11 +46,41 @@ def signup():
     if validateSignupRequest(request.form):
         if userExists(request.form):
             return redirect(url_for('auth.loginPage'))
-        addUser(request.form)
+        addUser(request.form, tp="client")
         loginUser(request.form['email'])
         return redirect(url_for('main.index'))
     return redirect(url_for('auth.signupPage'))        
 
+
+def addClient(requestForm):
+    dbCursor = db.cursor()
+    agentID = getAgentID()
+    sql = "INSERT INTO client_database VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NULL, %s)"
+    val = (requestForm['name'], requestForm['phone'], 
+    requestForm['email'], requestForm['aadhar'],
+    requestForm['pan'], generateUID(12),
+    getAgentID(),
+    requestForm['dob'], getAge(requestForm['dob']),
+    getGender(requestForm['sex']), "I", requestForm['branch'])
+    dbCursor.execute(sql, val)
+    db.commit()
+    dbCursor.close()
+
+def getAgentID():
+    dbCursor = db.cursor(buffered=True)
+    sql = "SELECT agent_ID, COUNT(agent_ID) FROM client_database GROUP BY agent_ID ORDER BY COUNT(agent_ID) ASC"
+    dbCursor.execute(sql)
+    agentID = dbCursor.fetchall()[0][0]
+    dbCursor.close()
+    return agentID
+
+def getAge(dob):
+    dob = datetime.strptime(dob, "%Y-%m-%d").date()
+    today = date.today()
+    return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+
+def getGender(gender):
+    return "M" if gender=="male" else "F"
 
 def userLoggedIn():
     return ('loggedIn' in session)
@@ -60,18 +97,20 @@ def loginUser(email):
 def getUserID(email):
     return 12345
 
-def addUser(requestForm):
+def addUser(requestForm, tp):
     dbCursor = db.cursor()
-    sql = "INSERT INTO LOGIN_DATABASE (username, password, email, phone) VALUES (%s, %s, %s, %s) "
+    sql = "INSERT INTO login_database (username, password, email, phone) VALUES (%s, %s, %s, %s) "
     val = (requestForm['username'], requestForm['password'], requestForm['email'], requestForm['phone'])
     dbCursor.execute(sql, val)
     db.commit()
     dbCursor.close()
+    if tp=='client':
+        addClient(requestForm)
 
-def validLogin(username, password):
+def validLogin(email, password):
     dbCursor = db.cursor()
-    sql = "SELECT * FROM LOGIN_DATABASE WHERE username = %s AND password = %s"
-    val = (username, password)
+    sql = "SELECT * FROM login_database WHERE email = %s AND password = %s"
+    val = (email, password)
     dbCursor.execute(sql, val)
     res = True if dbCursor.fetchone() else False
     dbCursor.close()
@@ -80,7 +119,7 @@ def validLogin(username, password):
 
 def userExists(requestForm):
     dbCursor = db.cursor()
-    sql = "SELECT * FROM LOGIN_DATABASE WHERE username = %s OR email = %s OR phone = %s"
+    sql = "SELECT * FROM login_database WHERE username = %s OR email = %s OR phone = %s"
     val = (requestForm['username'], requestForm['email'], requestForm['phone'])
     dbCursor.execute(sql, val)
     res = True if dbCursor.fetchone() else False
@@ -88,20 +127,20 @@ def userExists(requestForm):
     return res
 
 def validateSignupRequest(formData):
-    return (validUsername(formData['username']) 
-        and validPassword(formData['password'])
-        and validEmail(formData['email'])
-        and validPhone(formData['phone'])
+    return (checkNotPresent('username',formData['username'], 'login_database', 'Username already in use') 
+        and checkNotPresent('email',formData['email'], 'login_database', 'Email already in use')
+        and checkNotPresent('phone',formData['phone'], 'login_database', 'Phone already in use')
+        and checkNotPresent('client_aadhar',formData['aadhar'], 'client_database', 'Aadhar already linked to another account')
+        and checkNotPresent('client_PAN',formData['pan'], 'client_database', 'PAN number already linked to another account')
     ) 
 
-def validUsername(username):
-    return isinstance(username, str) and len(username) > 1
-
-def validPassword(password):
-    return isinstance(password, str) and len(password) > 1
-
-def validEmail(email):
-    return isinstance(email, str) and len(email) > 1
-
-def validPhone(ph):
-    return isinstance(ph, str) and ph.isdigit() and len(ph) == 10
+def checkNotPresent(attr, val, table, flashMessage=""):
+    dbCursor = db.cursor()
+    sql = "SELECT * FROM " + table + " WHERE " + attr + " = %s"
+    val = (val, )
+    dbCursor.execute(sql, val)
+    res = False if dbCursor.fetchone() else True
+    dbCursor.close()
+    if len(flashMessage)>0 and not res:
+        flash(flashMessage)
+    return res

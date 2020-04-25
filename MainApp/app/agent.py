@@ -31,7 +31,7 @@ def viewagentprofile():
 @agent.route('/getClientContact', methods= ['POST'])
 
 def getClientContact():
-    if not(userLoggedIn() and userType('agent'))
+    if not(userLoggedIn() and userType('agent')):
         return
     dbCursor = db.cursor()
     sql = "SELECT client_name, client_ph, client_email \

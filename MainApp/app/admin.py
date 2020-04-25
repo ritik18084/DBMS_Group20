@@ -2,7 +2,7 @@ import time
 from random import randint
 from flask import Blueprint, session, request, redirect, url_for, render_template
 from . import db
-from .auth import userLoggedIn, userType, addUser
+from .auth import userLoggedIn, userType, addUser, generateUID
 from datetime import datetime
 
 admin = Blueprint('admin',__name__)
@@ -10,12 +10,12 @@ admin = Blueprint('admin',__name__)
 # COMMON TO SHAREHOLDERS
 @admin.route('/viewBranchDetails', methods= ['POST'])
 def viewBranchDetails():
-    if not(userLoggedIn() and (userType('admin') or userType('shareholders'))):
-        return
+    # if not(userLoggedIn() and (userType('admin') or userType('shareholders'))):
+    #     return
     dbCursor = db.cursor()
     sql = "SELECT * FROM branch_database"
     dbCursor.execute(sql)
-    res = dbCursor.fetchAll()
+    res = dbCursor.fetchall()
     dbCursor.close()
     return res
 
@@ -28,7 +28,7 @@ def viewClients():
     dbCursor = db.cursor()
     sql = "SELECT * FROM client_database"
     dbCursor.execute(sql)
-    res = dbCursor.fetchAll()
+    res = dbCursor.fetchall()
     dbCursor.close()
     return res
 
@@ -39,7 +39,7 @@ def viewAgents():
     dbCursor = db.cursor()
     sql = "SELECT * FROM agent_database"
     dbCursor.execute(sql)
-    res = dbCursor.fetchAll()
+    res = dbCursor.fetchall()
     dbCursor.close()
     return res
 
@@ -50,7 +50,7 @@ def viewStaff():
     dbCursor = db.cursor()
     sql = "SELECT * FROM staff_database"
     dbCursor.execute(sql)
-    res = dbCursor.fetchAll()
+    res = dbCursor.fetchall()
     dbCursor.close()
     return res
 
@@ -61,7 +61,7 @@ def viewOrgs():
     dbCursor = db.cursor()
     sql = "SELECT * FROM company_database"
     dbCursor.execute(sql)
-    res = dbCursor.fetchAll()
+    res = dbCursor.fetchall()
     dbCursor.close()
     return res
 
@@ -164,7 +164,7 @@ def checkProfit():
         "GROUP BY branch_ID"
     val = (currDate, currDate, currDate)
     dbCursor.execute(sql, val)
-    res = dbCursor.fetchAll()
+    res = dbCursor.fetchall()
     dbCursor.close()
     return res
 
@@ -175,7 +175,7 @@ def totalPoiliciesBranch():
     dbCursor = db.cursor()
     sql = "SELECT branch_ID, branch_name, policies_enrolled from branch_database"
     dbCursor.execute(sql)
-    res = dbCursor.fetchAll()
+    res = dbCursor.fetchall()
     dbCursor.close()
     return res
 
@@ -188,7 +188,7 @@ def viewStaff():
     sql = "SELECT * FROM staff_database WHERE branch_ID = %s "
     val = (branchID, )
     dbCursor.execute(sql, val)
-    res = dbCursor.fetchAll()
+    res = dbCursor.fetchall()
     dbCursor.close()
     return res
 
