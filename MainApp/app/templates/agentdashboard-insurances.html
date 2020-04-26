@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Material Design for Bootstrap</title>
+  <!-- MDB icon -->
+ 
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <!-- Material Design Bootstrap -->
+  <link rel="stylesheet" href="../static/css/mdb.min.css">
+  <!-- Your custom styles (optional) -->
+  <link rel="stylesheet" href="../static/css/dashboard.css">
+  <link rel="stylesheet" href="../static/css/main-styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container-fluid">
+  <div id="mySidenav" class="sidenav">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="agentdashboard-insurances.html">Insurances</a>
+    <a href="agentdashboard-clients.html">Clients</a>
+    <a href="agentdashboard-profits.html">Profits</a>
+  </div>
+  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+  <span style="float: right;" class="glyphicon glyphicon-log-out">
+    <a style="font-size: 1.2em;" href="index.html">Logout</a>
+  </span>
+  <br><br>
+</div>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-4 col-sm-6">
+      <a href="agentdashboard-clients.html">
+      <section id="tile">
+        <span style="font-weight: bold;"><img src="../static/images/client.png" class="png">Clients</span>
+        <div>
+          32
+        </div>
+      </section>
+      </a>
+    </div>
+    <div class="col-md-4 col-sm-6">
+       <a href="agentdashboard-profits.html">
+       <section id="tile">
+        <span style="font-weight: bold;"><img src="../static/images/profit.png" class="png">Profits</span>
+        <div>
+          307
+        </div>
+      </section>
+      </a>
+    </div>
+    <div class="col-md-4 col-sm-12">
+      <a href="agentdashboard-insurances.html">
+      <section id="tile">
+        <span style="font-weight: bold;"><img src="../static/images/insurance.png" class="png">Insurances</span>
+        <div>
+          19
+        </div>
+      </section>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <h1 style="text-align: center;">Insurances Distributed Recently</h1>
+  <table>
+    <tr>
+      <th>Insurance Type</th>
+      <th>Policy key</th>
+      <th>Client ID</th>
+      <th>Start Date</th>
+      <th>End Date</th>
+      <th>Duration</th>
+    <tr>
+      <td>Vehicle</td>
+      <td>36543</td>
+      <td>102</td>
+      <td>25-02-19</td>
+      <td>25-02-23</td>
+      <td>4 years</td>
+    </tr>
+    <tr>
+      <td>Travel</td>
+      <td>432783</td>
+      <td>106</td>
+      <td>12-05-19</td>
+      <td>13-05-25</td>
+      <td>6 years</td>
+    </tr>
+    <tr>
+      <td>Life</td>
+      <td>78402</td>
+      <td>101</td>
+      <td>03-01-20</td>
+      <td></td>
+      <td>Lifetime</td>
+    </tr>
+    </tr>
+  </table>
+</div>
+
+<footer class="panel-footer" id="foot">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-4 copyright">
+          <div>&copy; 2020, Insure-X</div>
+          <div>All rights reserved by Insure-X</div>
+        </div>
+        <div class="col-sm-4 logo">
+          <img src="../static/images-main/logo.png">
+          <div>
+            <a href="#top" style="text-decoration: none;">Back to top</a>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <section id="icons">
+            <a href="#"><img src="../static/images-main/fb.png"></a>
+            <a href="#"><img src="../static/images-main/gmail.png"></a>
+            <a href="#"><img src="../static/images-main/twitter.png"></a>
+          </section>
+        </div>
+      </div>
+    </div>
+  </footer>
+<!-- Grid container -->
+  <script type="text/javascript" src="../static/js/jquery.min.js"></script>
+  <!-- Bootstrap tooltips -->
+  <!-- Bootstrap core JavaScript -->
+  <script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
+  <!-- MDB core JavaScript -->
+  <script type="text/javascript" src="../static/js/mdb.min.js"></script>
+  <!-- Your custom scripts (optional) -->
+  <script type="text/javascript">
+    function openNav() {
+      document.getElementById("mySidenav").style.width = "200px";
+    }
+
+    function closeNav() {
+      document.getElementById("mySidenav").style.width = "0";
+    }
+  </script>
+
+</body>
+</html>
