@@ -8,7 +8,7 @@ from datetime import datetime
 admin = Blueprint('admin',__name__)
 
 # COMMON TO SHAREHOLDERS
-@admin.route('/viewBranchDetails', methods= ['POST'])
+@admin.app_context_processor
 def viewBranchDetails():
     # if not(userLoggedIn() and (userType('admin') or userType('shareholders'))):
     #     return
@@ -17,7 +17,7 @@ def viewBranchDetails():
     dbCursor.execute(sql)
     res = dbCursor.fetchall()
     dbCursor.close()
-    return res
+    return {'branchDetails' : res }
 
 
 
@@ -180,7 +180,7 @@ def totalPoiliciesBranch():
     return res
 
 @admin.route('/viewbranchStaff', methods= ['POST'])
-def viewStaff():
+def viewbranchStaff():
     if not(userLoggedIn() and userType('admin')):
         return
     dbCursor = db.cursor()

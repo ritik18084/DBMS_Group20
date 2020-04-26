@@ -21,8 +21,7 @@ def viewStaffProfile():
 	dbCursor.close()
 	return res
 
-@staff.route('viewClientDetails', methods = ["POST"])
-
+@staff.route('/viewClientDetails', methods = ["POST"])
 def viewClientDetails():
 	if not(userLoggedIn() and userType("staff")):
 		return
@@ -34,8 +33,7 @@ def viewClientDetails():
 	dbCursor.close()
 	return res
 
-@staff.route("viewInsurance", methods = ['POST'])
-
+@staff.route("/viewInsurance", methods = ['POST'])
 def viewInsurance():
 	if not(userLoggedIn() and userType('staff')):
 		return

@@ -54,7 +54,7 @@ def viewCollabDetails():
 
 
 @organizations.route('/extendCollabDuration', methods= ['POST'])
-def viewCollabDetails():
+def extendCollabDuration():
     if not(userLoggedIn() and userType('organizations')):
         return
     dbCursor = db.cursor()
@@ -65,14 +65,3 @@ def viewCollabDetails():
     dbCursor.close()
     return
 
-@organizations.route('/editProfile', methods= ['POST'])
-def viewCollabDetails():
-    if not(userLoggedIn() and userType('organizations')):
-        return
-    dbCursor = db.cursor()
-    sql = "UPDATE company_database SET collab_duration = %d WHERE company_ID = %s "
-    val = (request.values.get('duration'), session['id'] )
-    dbCursor.execute(sql, val)
-    db.commit()
-    dbCursor.close()
-    return

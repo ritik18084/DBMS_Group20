@@ -15,7 +15,7 @@ def generateUID(length=12):
 @auth.route('/login')
 def loginPage():
     if userLoggedIn():
-        return redirect(url_for('main.index'))
+        return redirect(url_for('shareholders.dashboard'))
     return render_template('login.html')
 
 @auth.route('/signup')
@@ -92,10 +92,29 @@ def loginUser(email):
     session['loggedIn'] = True
     session['email'] = email
     session['id'] = getUserID(email)
+    session['username'] = getUsername(email)
+    session['phone'] = getPhone(email)
 
+def getUsername(email):
+    dbCursor = db.cursor()
+    sql = "SELECT username FROM login_database WHERE email = %s"
+    val = (email, )
+    dbCursor.execute(sql,val)
+    res = dbCursor.fetchone()[0]
+    dbCursor.close()
+    return res
+
+def getPhone(email):
+    dbCursor = db.cursor()
+    sql = "SELECT phone FROM login_database WHERE email = %s"
+    val = (email, )
+    dbCursor.execute(sql,val)
+    res = dbCursor.fetchone()[0]
+    dbCursor.close()
+    return res
 
 def getUserID(email):
-    return 12345
+    return '997723'
 
 def addUser(requestForm, tp):
     dbCursor = db.cursor()

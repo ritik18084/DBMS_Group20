@@ -92,6 +92,10 @@
 	display: inline;
 }
 
+.login100-form-btn {
+	width: 50%
+}
+
 @media (max-width: 992px) {
   .wrap-login100 {
     padding: 88px 90px 33px 85px;
@@ -228,7 +232,7 @@
 					<div class="wrap-input100 select-div">
 						<label for="branchselect" class="select-label"> Select Branch : </label>
 						<select id="branchselect" class="input100 input-center select-list" required name="branch" title="Select Branch">
-							{% with branches=viewBranchDetails() %}
+							{% with branches=branchDetails %}
 							{% for branch in branches %}
 								<option value="{{branch[5]}}">{{branch[0]}}</option>
 							{% endfor %}
