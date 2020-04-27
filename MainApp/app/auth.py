@@ -24,6 +24,12 @@ def signupPage():
         return redirect(url_for('main.index'))
     return render_template('signup.html')
 
+@auth.route('/company_signup')
+def company_signup_Page():
+	if userLoggedIn():
+		return redirect(url_for('main.index'))
+	return render_template('company_signup.html')
+
 @auth.route('/logout')
 def logout():
     session.pop('loggedIn', None)
@@ -49,7 +55,20 @@ def signup():
         addUser(request.form, tp="client")
         loginUser(request.form['email'])
         return redirect(url_for('main.index'))
-    return redirect(url_for('auth.signupPage'))        
+    return redirect(url_for('auth.signupPage'))    
+
+###########
+@auth.route('/company_signup', methods= ['POST'])
+def company_signup():
+    if userLoggedIn():
+        return redirect(url_for('main.index'))
+    if validateCompanySignupRequest(request.form):
+        if companyExists(request.form):
+            return redirect(url_for('auth.loginPage'))
+        addUserCompany(request.form, tp="company")
+        loginUser(request.form['email'])
+        return redirect(url_for('main.index'))  ##Change this to dashboard of company
+    return redirect(url_for('auth.company_signup_Page')) 
 
 
 def addClient(requestForm):
@@ -153,6 +172,48 @@ def validateSignupRequest(formData):
         and checkNotPresent('client_PAN',formData['pan'], 'client_database', 'PAN number already linked to another account')
     ) 
 
+
+######################
+#COMPANY SIGNUP
+def validateCompanySignupRequest(formData):
+    return (checkNotPresent('email',formData['email'], 'login_database', 'Email already in use')
+        and checkNotPresent('phone',formData['phone'], 'login_database', 'Phone already in use')
+        and checkNotPresent('company_name',formData['name'], 'company_database', 'This company is already registered')
+    )
+
+def addUserCompany(requestForm, tp):
+    dbCursor = db.cursor()
+    sql = "INSERT INTO login_database (username, password, email, phone) VALUES (%s, %s, %s, %s) "
+    val = (requestForm['name'][:11], requestForm['password'], requestForm['email'], requestForm['phone'])
+    dbCursor.execute(sql, val)
+    db.commit()
+    dbCursor.close()
+    if tp=='company':
+        addCompany(requestForm)
+
+def addCompany(requestForm):
+    dbCursor = db.cursor()
+    sql = "INSERT INTO company_database VALUES (%s, %s, %s, %s, %s, %s, 0, %s, %s, %s)"
+    val = (requestForm['name'], generateUID(8), 
+    requestForm['email'], requestForm['collab_type'],
+    requestForm['duration'],requestForm['phone'], 
+    requestForm['discount'], requestForm['type'],
+    generateUID(12))
+    dbCursor.execute(sql, val)
+    db.commit()
+    dbCursor.close()
+
+def companyExists(requestForm):
+    dbCursor = db.cursor()
+    sql = "SELECT * FROM login_database WHERE username = %s OR email = %s OR phone = %s"
+    val = (requestForm['name'], requestForm['email'], requestForm['phone'])
+    dbCursor.execute(sql, val)
+    res = True if dbCursor.fetchone() else False
+    dbCursor.close()
+    return res
+
+
+#################################
 def checkNotPresent(attr, val, table, flashMessage=""):
     dbCursor = db.cursor()
     sql = "SELECT * FROM " + table + " WHERE " + attr + " = %s"
