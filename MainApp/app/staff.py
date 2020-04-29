@@ -31,9 +31,10 @@ def viewStaffProfile():
 	if not(userLoggedIn() and userType('staff')):
 		return
 	dbCursor = db.cursor()
-	sql = "SELECT A.employee_name," \
-	"A.employee_aadhar, A.employee_PAN, B.branch_name,A.department, A.position, A.salary, A.employee_ph FROM STAFF_DATABASE A, BRANCH_DATABASE B " \
-	"WHERE employee_ID = %s AND A.branch_ID=B.branch_ID"
+	sql = "SELECT A.employee_name, \
+	A.employee_aadhar, A.employee_PAN, B.branch_name,A.department, A.position, A.salary, A.employee_ph \
+	FROM staff A, branch B  \
+	WHERE employee_ID = %s AND A.branch_ID=B.branch_ID"
 	employee_ID = session['id']
 	val = (employee_ID,)
 	dbCursor.execute(sql, val)
@@ -46,11 +47,14 @@ def viewClientDetails():
 	if not(userLoggedIn() and userType("staff")):
 		return
 	dbCursor = db.cursor()
-	sql = "SELECT A.*,B.*  FROM CLIENT_DATABASE A, AGENT_DATABASE B WHERE A.client_ID = %s AND A.agent_ID=B.agent_ID"
+	sql = "SELECT client_name,client_ph,client_email,branch_ID,client_aadhar,client_PAN,\
+	client_DOB,client_sex,agent_name,agent_ph,agent_email  FROM clients c, agents a WHERE \
+	c.client_ID = %s AND c.agent_ID=a.agent_ID"
 	val = (request.form['clientID'],)
 	dbCursor.execute(sql, val)
 	res = dbCursor.fetchone()
-	sql = "SELECT Unique_Ins_ID, ins_type, end_date  FROM INSURANCE_DATABASE WHERE client_ID = %s"
+	sql = "SELECT Unique_Ins_ID, ins_type, DATE_ADD(start_date, INTERVAL duration YEAR) as end_date  FROM \
+	insurances, policies WHERE policies.policy_key=insurances.policy_key AND client_ID = %s"
 	val = (request.form['clientID'],)
 	dbCursor.execute(sql, val)
 	res2 = dbCursor.fetchall()
@@ -65,7 +69,10 @@ def viewInsurance():
 	if not(userLoggedIn() and userType('staff')):
 		return
 	dbCursor = db.cursor()
-	sql = "SELECT A.*, B.policy_name FROM INSURANCE_DATABASE A, POLICY_DATABASE B WHERE A.Unique_ins_id = %s AND B.policy_key=A.policy_key"
+	sql = "SELECT c.client_name, c.client_ID,c.agent_ID,ins_type, \
+	policy_name,coverage_amt, ppm, start_date,  DATE_ADD(start_date, INTERVAL duration YEAR),\
+	dues, Unique_Ins_id FROM clients c, insurances i, policies p WHERE \
+	i.Unique_Ins_id = %s AND c.client_ID=i.client_ID AND p.policy_key=i.policy_key"
 	val = (request.form['insID'],)
 	dbCursor.execute(sql, val)
 	res = dbCursor.fetchone()
