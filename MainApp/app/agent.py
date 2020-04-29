@@ -29,7 +29,7 @@ def viewsold():
     if not(userLoggedIn() and userType('agent')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT A.client_name, B.client_ph, B.client_email ,A.ins_type, A.start_date, A.duration FROM INSURANCE_DATABASE A, CLIENT_DATABASE B WHERE A.agent_ID=%s AND A.client_ID=B.client_ID"
+    sql = "SELECT B.client_name, B.client_ph, B.client_email ,C.ins_type, A.start_date, C.duration FROM insurances A, clients B, policies C WHERE C.policy_key = A.policy_key AND B.agent_ID=%s AND A.client_ID=B.client_ID"
     val = (session['id'],)
     dbCursor.execute(sql, val)
     res = dbCursor.fetchall()
@@ -41,7 +41,7 @@ def viewCountSold():
     if not(userLoggedIn() and userType('agent')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT COUNT(*) FROM INSURANCE_DATABASE WHERE agent_ID=%s"
+    sql = "SELECT COUNT(*) FROM insurances I, (SELECT client_ID from clients WHERE agent_ID = %s) A WHERE I.client_ID = A.client_ID"
     val = (session['id'],)
     dbCursor.execute(sql, val)
     res = dbCursor.fetchone()[0]
@@ -53,12 +53,12 @@ def viewagentprofile():
     if not(userLoggedIn() and userType('agent')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT * FROM AGENT_DATABASE WHERE agent_ID=%s"
+    sql = "SELECT agent_name,agent_ph,agent_aadhar,commission_factor FROM agents WHERE agent_ID=%s"
     val = (session['id'],)
     dbCursor.execute(sql, val)
     res = dbCursor.fetchone()
     dbCursor.close()
-    return {'agentProfile' : [session['username'], res[1], session['email'], res[0], res[3], res[6]]}
+    return {'agentProfile' : [session['username'], res[1], session['email'], res[0], res[2], res[3]]}
 
 @agent.context_processor
 def getClientContact():
@@ -66,7 +66,7 @@ def getClientContact():
         return
     dbCursor = db.cursor()
     sql = "SELECT client_name, client_ph, client_email \
-    FROM CLIENT_DATABASE WHERE agent_ID= %s"
+    FROM clients WHERE agent_ID= %s"
     agent_ID = session['id']
     val = (agent_ID,)
     dbCursor.execute(sql, val)
@@ -79,8 +79,8 @@ def getClientCount():
     if not(userLoggedIn() and userType('agent')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT COUNT(*)" \
-    "FROM CLIENT_DATABASE WHERE agent_ID= %s"
+    sql = "SELECT COUNT(*) \
+    FROM clients WHERE agent_ID= %s"
     agent_ID = session['id']
     val = (agent_ID, )
     dbCursor.execute(sql, val)

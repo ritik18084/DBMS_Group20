@@ -13,7 +13,10 @@ def viewBranchDetails():
     # if not(userLoggedIn() and (userType('admin') or userType('shareholders'))):
     #     return
     dbCursor = db.cursor()
-    sql = "SELECT * FROM branch_database"
+    sql = "SELECT branch_name, branch_ph, branch_email, \
+    (select (select count(*) from staff s where s.branch_ID=b.branch_ID) from dual) as total_employees\
+    , (select (select count(*) from insurances i where i.branch_ID=b.branch_ID) from dual) \
+    as policies_sold, branch_ID from branch b;"
     dbCursor.execute(sql)
     res = dbCursor.fetchall()
     dbCursor.close()
@@ -63,7 +66,7 @@ def viewLogins():
     if not(userLoggedIn() and userType('admin')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT * FROM login_database"
+    sql = "SELECT username, email FROM login"
     dbCursor.execute(sql)
     res = dbCursor.fetchall()
     dbCursor.close()
@@ -75,7 +78,7 @@ def remLogin():
         return
     dbCursor = db.cursor()
     email = request.form['ID']
-    sql = "DELETE FROM login_database WHERE email=%s"
+    sql = "DELETE FROM login WHERE email=%s"
     val=(email, )
     dbCursor.execute(sql,val)
     db.commit()
@@ -96,7 +99,10 @@ def addStaff():
     dbCursor = db.cursor()
     if validateAddStaffRequest(request.form):
         addUser(request.form, "staff")
-        sql = "INSERT INTO staff_database VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        sql = "INSERT INTO staff_database(\
+        employee_name,employee_ph,employee_email,employee_aadhar,employee_PAN,\
+        employee_ID,branch_ID, department, position, salary) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+
         val = (request.form['name'], request.form['phone'], 
         request.form['email'], request.form['aadhar'],
         request.form['pan'], generateUID(12),
@@ -115,10 +121,11 @@ def addAgent():
     dbCursor = db.cursor()
     if validateAddAgentRequest(request.form):
         addUser(request.form, "agent")
-        sql = "INSERT INTO agent_database VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+        sql = "INSERT INTO agent_database(agent_name,\
+        agent_ph, agent_email, agent_aadhar, agent_ID, commission_factor) VALUES (%s, %s, %s, %s, %s, %s, %s)"
         val = (request.form['name'], request.form['phone'], 
         request.form['email'], request.form['aadhar'],
-        generateUID(12),'0', request.form['commission'],
+        generateUID(12), request.form['commission'],
         request.form['benefit'])
         dbCursor.execute(sql, val)
         db.commit()
@@ -147,14 +154,17 @@ def checkProfit():
     if not(userLoggedIn() and userType('admin')):
         return
     dbCursor = db.cursor()
-    currDate = datetime.today().strftime('%Y-%m-%d')
-    sql = "SELECT A.branch_ID, B.branch_name,SUM(A.P) as profit FROM " \
-        "(SELECT branch_ID, SUM(premium-coverage_amt) as P FROM insurance_database WHERE end_date <= %s GROUP BY branch_ID UNION ALL " \
-        "SELECT branch_ID, SUM(TIMESTAMPDIFF(MONTH, start_date, %s)*ppm) as P FROM insurance_database WHERE end_date > %s GROUP BY branch_ID UNION ALL " \
-        "SELECT branch_ID, 0 as P FROM branch_database) AS A, branch_database B " \
-        "WHERE A.branch_ID = B.branch_ID GROUP BY A.branch_ID"
-    val = (currDate, currDate, currDate)
-    dbCursor.execute(sql, val)
+    sql = "SELECT   A.branch_ID,   B.branch_name,   SUM(A.P) AS profit FROM   (SELECT i.branch_ID,\
+           SUM(p.premium - p.coverage_amt) AS P     FROM insurances i, policies p WHERE\
+                  p.policy_key = i.policy_key AND DATE_ADD(start_date, INTERVAL duration YEAR) <= curdate()\
+                 GROUP BY branch_ID UNION ALL SELECT  i.branch_ID, SUM(TIMESTAMPDIFF(MONTH,\
+                            i.start_date,curdate()) * p.ppm) AS P FROM \
+                            insurances i, policies p     WHERE \
+                            DATE_ADD(start_date, INTERVAL duration YEAR) > curdate()     GROUP BY       i.branch_ID     \
+                            UNION ALL SELECT branch.branch_ID, 0 AS P FROM branch) AS A   \
+                            INNER JOIN \
+    branch B ON A.branch_ID = B.branch_ID GROUP BY   B.branch_ID"
+    dbCursor.execute(sql)
     res = dbCursor.fetchall()
     dbCursor.close()
     print(res)
@@ -167,7 +177,8 @@ def viewbranchStaff():
         return
     dbCursor = db.cursor()
     branchID = request.values.get('branchID')
-    sql = "SELECT * FROM staff_database WHERE branch_ID = %s "
+    sql = "SELECT employee_name, employee_ph, employee_email,\
+    employee_aadhar,employee_PAN,employee_ID, branch_ID, department, position, salary FROM staff WHERE branch_ID = %s "
     val = (branchID, )
     dbCursor.execute(sql, val)
     res = dbCursor.fetchall()
