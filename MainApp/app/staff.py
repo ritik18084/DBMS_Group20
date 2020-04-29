@@ -1,6 +1,6 @@
 from flask import Blueprint, session, request, redirect, url_for, render_template
 from . import db
-from .auth import userLoggedIn,userType
+from .auth import userLoggedIn, userType
 
 staff = Blueprint('staff',__name__)
 
@@ -8,27 +8,27 @@ staff = Blueprint('staff',__name__)
 
 @staff.route('/staffDashboard')
 def dashboard():
-    if not(userLoggedIn() and userType('staff')):
+    if not(userLoggedIn() and userType('employee')):
         return
     return render_template('staff/dashboard.html')
 
 
 @staff.route('/staffClientInfo')
 def dashboardClient():
-    if not(userLoggedIn() and userType('staff')):
+    if not(userLoggedIn() and userType('employee')):
         return
     return render_template('staff/clientInfo.html')
 
 @staff.route('/staffInsuranceInfo')
 def dashboardInsurance():
-    if not(userLoggedIn() and userType('staff')):
+    if not(userLoggedIn() and userType('employee')):
         return
     return render_template('staff/insurance.html', staffClientQuery=False)
 
 
 @staff.context_processor
 def viewStaffProfile():
-	if not(userLoggedIn() and userType('staff')):
+	if not(userLoggedIn() and userType('employee')):
 		return
 	dbCursor = db.cursor()
 	sql = "SELECT A.employee_name, \
@@ -44,12 +44,12 @@ def viewStaffProfile():
 
 @staff.route('/viewClientDetails', methods = ["POST"])
 def viewClientDetails():
-	if not(userLoggedIn() and userType("staff")):
+	if not(userLoggedIn() and userType("employee")):
 		return
 	dbCursor = db.cursor()
-	sql = "SELECT client_name,client_ph,client_email,branch_ID,client_aadhar,client_PAN,\
-	client_DOB,client_sex,agent_name,agent_ph,agent_email  FROM clients c, agents a WHERE \
-	c.client_ID = %s AND c.agent_ID=a.agent_ID"
+	sql = "SELECT client_name,client_ph,client_email,branch_ID,client_aadhar,client_PAN, "\
+	"client_DOB,client_sex,agent_name,agent_ph,agent_email  FROM clients c, agents a WHERE "\
+	"c.client_ID = %s AND c.agent_ID=a.agent_ID"
 	val = (request.form['clientID'],)
 	dbCursor.execute(sql, val)
 	res = dbCursor.fetchone()
@@ -66,13 +66,13 @@ def viewClientDetails():
 
 @staff.route("/viewStaffInsurance", methods = ['POST'])
 def viewInsurance():
-	if not(userLoggedIn() and userType('staff')):
+	if not(userLoggedIn() and userType('employee')):
 		return
 	dbCursor = db.cursor()
-	sql = "SELECT c.client_name, c.client_ID,c.agent_ID,ins_type, \
-	policy_name,coverage_amt, ppm, start_date,  DATE_ADD(start_date, INTERVAL duration YEAR),\
-	dues, Unique_Ins_id FROM clients c, insurances i, policies p WHERE \
-	i.Unique_Ins_id = %s AND c.client_ID=i.client_ID AND p.policy_key=i.policy_key"
+	sql = "SELECT c.client_name, c.client_ID,c.agent_ID,ins_type, " \
+	"policy_name,coverage_amt, ppm, start_date,  DATE_ADD(start_date, INTERVAL duration YEAR), "\
+	"dues, Unique_Ins_id FROM clients c, insurances i, policies p WHERE "\
+	"i.Unique_Ins_id = %s AND c.client_ID=i.client_ID AND p.policy_key=i.policy_key"
 	val = (request.form['insID'],)
 	dbCursor.execute(sql, val)
 	res = dbCursor.fetchone()

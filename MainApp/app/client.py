@@ -49,12 +49,14 @@ def viewprofile():
     if not(userLoggedIn() and userType('client')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT A.*, B.agent_name, B.agent_ph, B.agent_email, C.branch_name FROM client_database A, agent_database B, branch_database C WHERE A.client_ID=%s AND A.agent_ID = B.agent_ID AND A.branch_ID = C.branch_ID" 
+    sql = "SELECT A.client_ph,A.client_name, A.client_aadhar, A.client_PAN,A.client_DOB, A.client_sex \
+        ,B.agent_name, B.agent_ph, B.agent_email, C.branch_name, A.client_ID FROM clients A, agents B, branch C WHERE A.client_ID=%s AND A.agent_ID = B.agent_ID AND A.branch_ID = C.branch_ID" 
     val = (session['id'],)
     dbCursor.execute(sql, val)
     res = dbCursor.fetchone()
     dbCursor.close()
-    return {'clientInfo' : [session['username'], res[1], session['email'], res[0], res[3], res[4], res[7], res[8], res[9], res[13], res[14], res[15], res[16] ]}
+    ret = [session['username'], res[0], session['email']] + list(res)[1:]
+    return {'clientInfo' : ret }
 
 
 @client.context_processor
@@ -62,8 +64,8 @@ def viewBuyPolicies():
     if not(userLoggedIn() and userType('client')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT ins_type,policy_name,policy_key, min_coverage, premium, duration_min, eligibility_cond,\
-    terms_conditions FROM policy_database"
+    sql = "SELECT ins_type,policy_name,policy_key, coverage_amt, premium, duration, eligibility_cond,\
+    terms_conditions FROM policies"
     dbCursor.execute(sql)
     res = dbCursor.fetchall()
     dbCursor.close()
@@ -74,8 +76,8 @@ def viewallpolicies():
     if not(userLoggedIn() and userType('client')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT policy_name, ins_type, min_coverage, premium,eligibility_cond,\
-    terms_conditions FROM policy_database"
+    sql = "SELECT policy_name, ins_type, coverage_amt, premium,eligibility_cond,\
+    terms_conditions FROM policies"
     dbCursor.execute(sql)
     res = dbCursor.fetchall()
     dbCursor.close()
@@ -87,7 +89,7 @@ def viewallTransactions():
         return
     dbCursor = db.cursor()
     sql = "SELECT A.payment_datetime, A.amount, B.Unique_Ins_ID, C.ins_type, C.policy_name \
-    FROM TRANSACTIONS A, INSURANCE_DATABASE B, POLICY_DATABASE C \
+    FROM transactions A, insurances B, policies C \
     WHERE A.Unique_Ins_ID = B.Unique_Ins_ID AND B.client_ID = %s AND C.policy_key = B.policy_key \
     ORDER BY A.payment_datetime DESC"
     val = (session['id'], )
@@ -102,7 +104,7 @@ def totalInsurances():
     if not(userLoggedIn() and userType('client')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT COUNT(*) FROM insurance_database WHERE client_ID = %s";
+    sql = "SELECT COUNT(*) FROM insurances WHERE client_ID = %s";
     val = (session['id'], )
     dbCursor.execute(sql,val)
     res = dbCursor.fetchone()
@@ -114,8 +116,8 @@ def viewinsurances():
     if not(userLoggedIn() and userType('client')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT B.policy_name, B.ins_type, B.min_coverage, B.premium, A.start_date, B.duration_min, A.ppm, A.dues \
-        FROM insurance_database A, policy_database B WHERE A.client_ID = %s AND A.policy_key = B.policy_key"
+    sql = "SELECT B.policy_name, B.ins_type, B.coverage_amt, B.premium, A.start_date, B.duration, A.dues \
+        FROM insurances A, policies B WHERE A.client_ID = %s AND A.policy_key = B.policy_key"
     val = (session['id'],)
     dbCursor.execute(sql, val)
     res = dbCursor.fetchall()
@@ -126,7 +128,16 @@ def viewinsurances():
 def offers():
     if not(userLoggedIn() and userType('client')):
         return
-    return {'offerValid' : False}
+    dbCursor = db.cursor()    
+    sql = "SELECT A.discount_factor FROM offers A, companies B, clients C \
+        WHERE A.company_ID = B.company_ID AND A.active = 1 AND B.company_reg_no = C.company_reg_no AND C.client_ID = %s"
+    val = (session['id'], )
+    dbCursor.execute(sql, val)
+    res = dbCursor.fetchone()
+    if res:
+        return {'offerValid' : True, 'offerDiscount' : res[0]}
+    else:
+        return {'offerValid' : False}
 
 
 @client.context_processor
@@ -134,8 +145,8 @@ def getDues():
     if not(userLoggedIn() and userType('client')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT B.policy_name, B.min_coverage,B.premium, A.dues, A.Unique_ins_ID \
-        FROM insurance_database A, policy_database B WHERE A.client_ID = %s AND A.policy_key = B.policy_key AND A.dues > 0"
+    sql = "SELECT B.policy_name, B.coverage_amt ,B.premium, A.dues, A.Unique_ins_ID \
+        FROM insurances A, policies B WHERE A.client_ID = %s AND A.policy_key = B.policy_key AND A.dues > 0"
     val = (session['id'],)
     dbCursor.execute(sql, val)
     res = dbCursor.fetchall()
@@ -148,16 +159,17 @@ def paydue():
         return
     dbCursor = db.cursor()
     currDateTime = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-    sql = "SELECT dues FROM insurance_database WHERE Unique_Ins_ID = %s"
+    sql = "SELECT dues FROM insurances WHERE Unique_Ins_ID = %s"
     val = (request.form['id'],)
     dbCursor.execute(sql,val)
     res = dbCursor.fetchone()
     if res:
         amount = res[0]
-        sql = "INSERT INTO TRANSACTIONS VALUES ('%s', '%s', %f, '%s')" % (generateUID(16),request.form['id'],amount,currDateTime)
-        dbCursor.execute(sql)
+        sql = "INSERT INTO transactions (transaction_ID, Unique_ins_ID, amount, payment_datetime) VALUES (%s, %s, %s, %s)" 
+        val = (generateUID(16),request.form['id'],amount,currDateTime)
+        dbCursor.execute(sql, val)
         db.commit()
-        sql = "UPDATE insurance_database SET dues=0 WHERE Unique_Ins_ID = %s"
+        sql = "UPDATE insurances SET dues=0 WHERE Unique_Ins_ID = %s"
         val = (request.form['id'], )
         dbCursor.execute(sql,val)
         db.commit()
@@ -172,7 +184,7 @@ def boughtInsurance():
         return
     dbCursor = db.cursor()
     policy_key = request.form['policy_key']
-    sql = "SELECT ins_type FROM policy_database WHERE policy_key=%s"
+    sql = "SELECT ins_type FROM policies WHERE policy_key=%s"
     val = (policy_key,)
     dbCursor.execute(sql, val)
     res = dbCursor.fetchone()
@@ -193,25 +205,45 @@ def boughtInsurance():
 
 
 def buyHome(req):
-    dbCursor = db.cursor()
-    # INSERT INTO INSURANCE DATABASE AND STORE UNIQUE INS ID
-    unique_ins_id = '634736195656'
-    path = unique_ins_id
-    # sql = "INSERT INTO INSURANCE_DATABASE VALUES "
-     
     if 'file' not in req.files:
         flash('No file Provided')
         return redirect(url_for('client.dashboardBuy'))
     file = req.files['file']
+    
     if file.filename == '':
         flash('No selected file')
         return redirect(url_for('client.dashboardBuy'))
     if file:
+
+        dbCursor = db.cursor()
+    
+        unique_ins_id = generateUID(12)
+        path = unique_ins_id
+        currDate = datetime.today().strftime('%Y-%m-%d')
+        
+        sql = "SELECT branch_ID from clients where client_ID = %s"
+        val = (session['id'], )
+        dbCursor.execute(sql, val)
+        branchID = dbCursor.fetchone()[0]
+
+        dbCursor.close()
+
+        dbCursor = db.cursor()
+
+        sql = "INSERT INTO insurances (policy_key, client_ID, start_date, branch_ID, Unique_Ins_ID, dues) values (%s, %s, %s, %s, %s, 0)"
+        val = (req.form['policy_key'], session['id'], currDate, branchID, unique_ins_id)
+        dbCursor.execute(sql,val)
+        db.commit()
+
+        dbCursor.close()
+        
+        dbCursor = db.cursor()
+
         filename = secure_filename(file.filename)
         file.save(path)
-        sql = "INSERT INTO home_insurance_database VALUES ('%s', '%s', '%s', %d, '%s')" \
-            % (unique_ins_id, req.form['location'],path,int(req.form['area']), req.form['ownerName'])
-        dbCursor.execute(sql)
+        sql = "INSERT INTO home_insurance (Unique_Ins_ID,path_to_prop_papers,prop_location,owners_names,prop_area) VALUES (%s, %s, %s, %s, %s)" 
+        val =  (unique_ins_id, path, req.form['location'],req.form['ownerName'],int(req.form['area']))
+        dbCursor.execute(sql, val)
         db.commit()
         dbCursor.close()
         flash('Purchase Successfull')
@@ -223,19 +255,18 @@ def buyHome(req):
 
 def buyVehicle(req):
     dbCursor = db.cursor()
-    # INSERT INTO INSURANCE DATABASE AND STORE UNIQUE INS ID
-    unique_ins_id = '634736195656'
-    path = unique_ins_id
-    # sql = "INSERT INTO INSURANCE_DATABASE VALUES "
-
-    sql = "SELECT * FROM vehicle_insurance_database WHERE RC_num = %s" \
-        % (req.form['rcno'])
-    dbCursor.execute(sql)
+    
+    
+    sql = "SELECT * FROM vehicle_insurance WHERE RC_num = %s" 
+    val = (req.form['rcno'], )
+    dbCursor.execute(sql, val)
     res = dbCursor.fetchone()
     
     if res:
         flash('RC already linked to another insurance')
         return redirect(url_for('client.dashboardBuy')) 
+    
+    
     
     if 'file' not in req.files:
         flash('No file Provided')
@@ -244,13 +275,29 @@ def buyVehicle(req):
     if file.filename == '':
         flash('No selected file')
         return redirect(url_for('client.dashboardBuy'))
+    
     if file:
+        unique_ins_id = generateUID(12)
+        path = unique_ins_id
+        currDate = datetime.today().strftime('%Y-%m-%d')
+
+        sql = "SELECT branch_ID from clients where client_ID = %s"
+        val = (session['id'], )
+        dbCursor.execute(sql, val)
+        branchID = dbCursor.fetchone()[0]
+
+        sql = "INSERT INTO insurances (policy_key, client_ID, start_date, branch_ID, Unique_Ins_ID, dues) values (%s, %s, %s, %s, %s, %s)"
+        val = (req.form['policy_key'], session['id'], currDate, branchID, unique_ins_id, 0)
+        dbCursor.execute(sql,val)
+        db.commit()
+
+
         filename = secure_filename(file.filename)
         file.save(path)
-        sql = "INSERT INTO vehicle_insurance_database (Unique_Ins_ID, vehicle_ID, vehicle_type, RC_num, Path_to_RC)" \
-            "VALUES ('%s', '%s', '%s', '%s', '%s')" \
-            % (unique_ins_id, req.form['vehicleID'], req.form['type'],req.form['rcno'],path)
-        dbCursor.execute(sql)
+        sql = "INSERT INTO vehicle_insurance (Unique_Ins_ID, vehicle_ID, vehicle_type, RC_num, Path_to_RC)" \
+            "VALUES (%s, %s, %s, %s, %s)" 
+        val = (unique_ins_id, req.form['vehicleID'], req.form['type'],req.form['rcno'],path)
+        dbCursor.execute(sql, val)
         db.commit()
         dbCursor.close()
         flash('Purchase Successfull')
@@ -261,23 +308,33 @@ def buyVehicle(req):
 
 def buyTravel(req):
     dbCursor = db.cursor()
-    # INSERT INTO INSURANCE DATABASE AND STORE UNIQUE INS ID
-    unique_ins_id = '138515833433'
-    # sql = "INSERT INTO INSURANCE_DATABASE VALUES "
-    sql = "INSERT INTO travel_insurance_database VALUES ('%s','%s', '%s', '%s')" \
-        % (unique_ins_id, req.form['date'], req.form['travelType'], req.form['details'])
-    dbCursor.execute(sql)
+    
+    unique_ins_id = generateUID(12)
+    path = unique_ins_id
+    currDate = datetime.today().strftime('%Y-%m-%d')
+    
+    sql = "SELECT branch_ID from clients where client_ID = %s"
+    val = (session['id'], )
+    dbCursor.execute(sql, val)
+    branchID = dbCursor.fetchone()[0]
+
+    sql = "INSERT INTO insurances (policy_key, client_ID, start_date, branch_ID, Unique_Ins_ID, dues) values (%s, %s, %s, %s, %s, %s)"
+    val = (req.form['policy_key'], session['id'], currDate, branchID, unique_ins_id, 0)
+    dbCursor.execute(sql,val)
+    db.commit()
+
+    sql = "INSERT INTO travel_insurance (travel_type,travel_details,Unique_Ins_ID,travel_date) VALUES (%s, %s, %s, %s)" 
+    val = (req.form['travelType'], req.form['details'], unique_ins_id, req.form['date'])
+    
+    dbCursor.execute(sql,val)
     db.commit()
     dbCursor.close()
+    
     flash('Purchase Successfull')
     return redirect(url_for('client.dashboardBuy'))
 
 def buyLife(req):
     dbCursor = db.cursor()
-    # INSERT INTO INSURANCE DATABASE AND STORE UNIQUE INS ID
-    unique_ins_id = '634736195656'
-    path = unique_ins_id
-    # sql = "INSERT INTO INSURANCE_DATABASE VALUES "
      
     if 'file' not in req.files:
         flash('No file Provided')
@@ -286,14 +343,34 @@ def buyLife(req):
     if file.filename == '':
         flash('No selected file')
         return redirect(url_for('client.dashboardBuy'))
+    
     if file:
+
+        dbCursor = db.cursor()
+    
+        unique_ins_id = generateUID(12)
+        path = unique_ins_id
+        currDate = datetime.today().strftime('%Y-%m-%d')
+        
+        sql = "SELECT branch_ID from clients where client_ID = %s"
+        val = (session['id'], )
+        dbCursor.execute(sql, val)
+        branchID = dbCursor.fetchone()[0]
+
+        sql = "INSERT INTO insurances (policy_key, client_ID, start_date, branch_ID, Unique_Ins_ID, dues) values (%s, %s, %s, %s, %s, %s)"
+        val = (req.form['policy_key'], session['id'], currDate, branchID, unique_ins_id, 0)
+        dbCursor.execute(sql,val)
+        db.commit()
+
         filename = secure_filename(file.filename)
         file.save(path)
-        sql = "INSERT INTO life_insurance_database VALUES ('%s', '%s', '%s', '%s')" \
-            % (unique_ins_id, req.form['nom1name'], req.form['nom2name'],path)
-        dbCursor.execute(sql)
+        
+        sql = "INSERT INTO life_insurance (nominee_name2,nominee_name1,path_to_birth_certificate,Unique_Ins_ID) VALUES (%s, %s, %s, %s)" 
+        val = (req.form['nom1name'], req.form['nom2name'],path, unique_ins_id,)
+        dbCursor.execute(sql, val)
         db.commit()
         dbCursor.close()
+        
         flash('Purchase Successfull')
         return redirect(url_for('client.dashboardBuy'))
 
@@ -301,11 +378,6 @@ def buyLife(req):
     return redirect(url_for('client.dashboardBuy'))
 
 def buyMedical(req):
-    dbCursor = db.cursor()
-    # INSERT INTO INSURANCE DATABASE AND STORE UNIQUE INS ID
-    unique_ins_id = '634736195656'
-    path = unique_ins_id
-    # sql = "INSERT INTO INSURANCE_DATABASE VALUES "
      
     if 'file' not in req.files:
         flash('No file Provided')
@@ -314,14 +386,33 @@ def buyMedical(req):
     if file.filename == '':
         flash('No selected file')
         return redirect(url_for('client.dashboardBuy'))
+    
     if file:
+
+        dbCursor = db.cursor()
+    
+        unique_ins_id = generateUID(12)
+        path = unique_ins_id
+        currDate = datetime.today().strftime('%Y-%m-%d')
+        
+        sql = "SELECT branch_ID from clients where client_ID = %s"
+        val = (session['id'], )
+        dbCursor.execute(sql, val)
+        branchID = dbCursor.fetchone()[0]
+
+        sql = "INSERT INTO insurances (policy_key, client_ID, start_date, branch_ID, Unique_Ins_ID, dues) values (%s, %s, %s, %s, %s, %s)"
+        val = (req.form['policy_key'], session['id'], currDate, branchID, unique_ins_id, 0)
+        dbCursor.execute(sql,val)
+        db.commit()
+
         filename = secure_filename(file.filename)
         file.save(path)
-        sql = "INSERT INTO medical_insurance_database VALUES ('%s', '%s', '%s')" \
-            % (unique_ins_id, req.form['history'],path)
-        dbCursor.execute(sql)
+        sql = "INSERT INTO medical_insurance (Unique_Ins_ID,path_to_medical_bills,medical_history) VALUES (%s, %s, %s)" 
+        val =  (unique_ins_id, path, req.form['history'])
+        dbCursor.execute(sql, val)
         db.commit()
         dbCursor.close()
+
         flash('Purchase Successfull')
         return redirect(url_for('client.dashboardBuy'))
 

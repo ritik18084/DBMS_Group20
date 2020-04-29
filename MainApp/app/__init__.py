@@ -5,8 +5,8 @@ import mysql.connector
 db = mysql.connector.connect(
   host="localhost",
   user="root",
-  passwd="",
-  database="testDatabase"
+  passwd="ayan2000",
+  database="InsureX"
 )
 
 app = None

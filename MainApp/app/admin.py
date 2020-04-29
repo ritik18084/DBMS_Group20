@@ -98,8 +98,8 @@ def addStaff():
         return
     dbCursor = db.cursor()
     if validateAddStaffRequest(request.form):
-        addUser(request.form, "staff")
-        sql = "INSERT INTO staff_database(\
+        addUser(request.form, "employee")
+        sql = "INSERT INTO staff(\
         employee_name,employee_ph,employee_email,employee_aadhar,employee_PAN,\
         employee_ID,branch_ID, department, position, salary) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
@@ -121,12 +121,11 @@ def addAgent():
     dbCursor = db.cursor()
     if validateAddAgentRequest(request.form):
         addUser(request.form, "agent")
-        sql = "INSERT INTO agent_database(agent_name,\
-        agent_ph, agent_email, agent_aadhar, agent_ID, commission_factor) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        sql = "INSERT INTO agents(agent_name,\
+        agent_ph, agent_email, agent_aadhar, agent_ID, commission_factor) VALUES (%s, %s, %s, %s, %s, %s)"
         val = (request.form['name'], request.form['phone'], 
         request.form['email'], request.form['aadhar'],
-        generateUID(12), request.form['commission'],
-        request.form['benefit'])
+        generateUID(12), request.form['commission'])
         dbCursor.execute(sql, val)
         db.commit()
         dbCursor.close()
@@ -134,18 +133,18 @@ def addAgent():
     return redirect(url_for('admin.dashboardAddAgent'))
 
 def validateAddAgentRequest(formData):
-    return (checkNotPresent('username',formData['username'], 'login_database', 'Username already in use') 
-        and checkNotPresent('email',formData['email'], 'login_database', 'Email already in use')
-        and checkNotPresent('phone',formData['phone'], 'login_database', 'Phone already in use')
-        and checkNotPresent('agent_aadhar',formData['aadhar'], 'agent_database', 'Aadhar already linked to another account')
+    return (checkNotPresent('username',formData['username'], 'login', 'Username already in use') 
+        and checkNotPresent('email',formData['email'], 'login', 'Email already in use')
+        and checkNotPresent('agent_ph',formData['phone'], 'agents', 'Phone already in use')
+        and checkNotPresent('agent_aadhar',formData['aadhar'], 'agents', 'Aadhar already linked to another account')
     ) 
 
 def validateAddStaffRequest(formData):
-    return (checkNotPresent('username',formData['username'], 'login_database', 'Username already in use') 
-        and checkNotPresent('email',formData['email'], 'login_database', 'Email already in use')
-        and checkNotPresent('phone',formData['phone'], 'login_database', 'Phone already in use')
-        and checkNotPresent('employee_aadhar',formData['aadhar'], 'staff_database', 'Aadhar already linked to another account')
-        and checkNotPresent('employee_PAN',formData['pan'], 'staff_database', 'PAN already linked to another account')
+    return (checkNotPresent('username',formData['username'], 'login', 'Username already in use') 
+        and checkNotPresent('email',formData['email'], 'login', 'Email already in use')
+        and checkNotPresent('employee_ph',formData['phone'], 'staff', 'Phone already in use')
+        and checkNotPresent('employee_aadhar',formData['aadhar'], 'staff', 'Aadhar already linked to another account')
+        and checkNotPresent('employee_PAN',formData['pan'], 'staff', 'PAN already linked to another account')
     ) 
 
 

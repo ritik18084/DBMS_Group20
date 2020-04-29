@@ -180,7 +180,6 @@
                   <tr>
                     <th scope="col" class="sort" data-sort="name">Username</th>
                     <th scope="col" class="sort" data-sort="completion">Email</th>
-                    <th scope="col" class="sort" data-sort="budget">Phone</th>
                     <th scope="col" class="sort" data-sort="salary"></th>
                     
                   </tr>
@@ -197,14 +196,11 @@
                       </div>
                     </th>
                     <td>
-                      {{entry[2]}}
-                    </td>
-                    <td>
                       {{entry[1]}}
                     </td>
                     <td>
                       <form class="form-inline mr-sm-3" action="/removeLogin" method="POST">
-                       <button name="ID" class="btn btn-sm btn-primary" value="{{entry[2]}}">Remove</button>
+                       <button name="ID" class="btn btn-sm btn-primary" value="{{entry[1]}}">Remove</button>
                        </form>
                     </td>
                   </tr>

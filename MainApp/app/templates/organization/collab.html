@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 
@@ -64,12 +63,13 @@
     <nav class="navbar navbar-top navbar-expand navbar-dark bg-primary border-bottom">
       <div class="container-fluid">
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          
+
           <!-- Navbar links -->
           <ul class="navbar-nav align-items-center  ml-md-auto ">
             <li class="nav-item d-xl-none">
               <!-- Sidenav toggler -->
-              <div class="pr-3 sidenav-toggler sidenav-toggler-dark" data-action="sidenav-pin" data-target="#sidenav-main">
+              <div class="pr-3 sidenav-toggler sidenav-toggler-dark" data-action="sidenav-pin"
+                data-target="#sidenav-main">
                 <div class="sidenav-toggler-inner">
                   <i class="sidenav-toggler-line"></i>
                   <i class="sidenav-toggler-line"></i>
@@ -80,7 +80,8 @@
           </ul>
           <ul class="navbar-nav align-items-center  ml-auto ml-md-0 ">
             <li class="nav-item dropdown">
-              <a class="nav-link pr-0" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <a class="nav-link pr-0" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
                 <div class="media align-items-center">
                   <span class="avatar avatar-sm rounded-circle">
                     <img alt="Image placeholder" src="/static/assets/img/theme/team-4.jpg">
@@ -138,88 +139,134 @@
               <div class="row align-items-center">
                 <div class="col-8">
                   <h3 class="mb-0">
-                    Collaboration 
+                    Collaboration
                   </h3>
                 </div>
               </div>
             </div>
             <div class="card-body">
-                <h6 class="heading-small text-muted mb-4">Details</h6>
-                <div class="pl-lg-4">
-                  <div class="row">
-                    <div class="col-lg-3">
-                      
-                        Collaboration Type
-                      
-                    </div>
-                    <div class="col-lg-1">
-                      
-                      : 
-                  
-                    </div>
-                    <div class="col-lg-8">
-                      
-                        {{collabDetails[0]}} 
-                    
-                    </div>
+              {% if collabExists %}
+              <h6 class="heading-small text-muted mb-4">Details</h6>
+              <div class="pl-lg-4">
+                <div class="row">
+                  <div class="col-lg-3">
+
+                    Offer Desc
+
                   </div>
-                  <div class="row">
-                    <div class="col-lg-3">
-                      
-                        Start Date
-                      
-                    </div>
-                    <div class="col-lg-1">
-                      
-                      : 
-                  
-                    </div>
-                    <div class="col-lg-8">
-                      
-                        {{collabDetails[1]}} 
-                    
-                    </div>
+                  <div class="col-lg-1">
+
+                    :
+
                   </div>
-                  <div class="row">
-                    <div class="col-lg-3">
-                      
-                        Duration
-                      
-                    </div>
-                    <div class="col-lg-1">
-                      
-                      : 
-                  
-                    </div>
-                    <div class="col-lg-8">
-                      
-                        {{collabDetails[2]}} years
-                    
-                    </div>
+                  <div class="col-lg-8">
+
+                    {{collabDetails[0]}}
+
                   </div>
-                  
+                </div>
+                <div class="row">
+                  <div class="col-lg-3">
+
+                    Start Date
+
+                  </div>
+                  <div class="col-lg-1">
+
+                    :
+
+                  </div>
+                  <div class="col-lg-8">
+
+                    {{collabDetails[1]}}
+
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-3">
+
+                    Duration
+
+                  </div>
+                  <div class="col-lg-1">
+
+                    :
+
+                  </div>
+                  <div class="col-lg-8">
+
+                    {{collabDetails[2]}} years
+
+                  </div>
+                </div>
+
               </div>
               <hr class="my-4" />
               <h6 class="heading-small text-muted mb-4">Extend Duration</h6>
+              <div class="pl-lg-4">
+                <div class="row">
+                  <form action="/extendCollabDuration" method="POST">
+                    <div class="col-lg-12">
+
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-extension">Extend Duration By (Years)</label>
+                        <input type="number" min="0" max="5" id="input-extension" class="form-control" placeholder="0"
+                          value="0" required name="extension">
+                      </div>
+                      <div class="form-group">
+                        <button name="ID" class="btn btn-sm btn-primary">Extend</button>
+                      </div>
+
+                    </div>
+                  </form>
+                </div>
+
+              </div>
+              {% else %}
+              <form action="/applyCollab" method="POST">
+                <h6 class="heading-small text-muted mb-4">Apply</h6>
                 <div class="pl-lg-4">
                   <div class="row">
-                    <form action="/extendCollabDuration" method="POST">
-                    <div class="col-lg-12">
-                    
-                        <div class="form-group">
-                          <label class="form-control-label" for="input-extension">Extend Duration By (Years)</label>
-                          <input type="number" min="0" max="5" id="input-extension" class="form-control" placeholder="0" value="0" required name="extension">
-                        </div>
-                        <div class="form-group">
-                          <button name="ID" class="btn btn-sm btn-primary">Extend</button>
-                        </div>
-                      
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-duration">Duration (Years)</label>
+                        <input type="number" min="1" max="5" id="input-duration" class="form-control" placeholder="1"
+                          value="1" required name="duration">
+                      </div>
                     </div>
-                    </form>
                   </div>
-                  
-              </div>      
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label>Select Offer</label>
+                        
+                        <div class="custom-control custom-radio custom-control">
+                          <input type="radio" class="custom-control-input" id="flatOffer"
+                            name="offer" value="1" checked>
+                          <label class="custom-control-label" for="flatOffer">FLAT 20% OFF</label>
+                        </div>
+
+                        
+                        <div class="custom-control custom-radio custom-control">
+                          <input type="radio" class="custom-control-input" id="limitedOffer"
+                            name="offer" value="2">
+                          <label class="custom-control-label" for="limitedOffer">Limited 30% OFF</label>
+                        </div>
+                        
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12 text-right">
+                      <button class="btn btn-primary">Apply</a>
+                    </div>
+                  </div>
+                </div>
+              </form>
+              {% endif%}
             </div>
+
+
           </div>
         </div>
       </div>
