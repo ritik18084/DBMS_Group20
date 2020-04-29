@@ -35,27 +35,33 @@
           <!-- Nav items -->
           <ul class="navbar-nav">
             <li class="nav-item">
-              <a class="nav-link active" href="{{url_for('shareholders.dashboard')}}">
+              <a class="nav-link" href="{{url_for('admin.dashboard')}}">
                 <i class="ni ni-tv-2 text-primary"></i>
                 <span class="nav-link-text">Dashboard</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{url_for('shareholders.dashboardProfit')}}">
-                <i class="ni ni-trophy text-orange"></i>
-                <span class="nav-link-text">Profit</span>
+              <a class="nav-link" href="{{url_for('admin.dashboardBranchEmp')}}">
+                <i class="ni ni-atom text-orange"></i>
+                <span class="nav-link-text">Employee Details</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{url_for('shareholders.dashboardStats')}}">
-                <i class="ni ni-chart-pie-35 text-primary"></i>
-                <span class="nav-link-text">Statistics</span>
+              <a class="nav-link" href="{{url_for('admin.dashboardDeactivateAcc')}}">
+                <i class="ni ni-fat-delete text-primary"></i>
+                <span class="nav-link-text">Remove Account</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{url_for('shareholders.dashboardBranch')}}">
-                <i class="ni ni-square-pin text-yellow"></i>
-                <span class="nav-link-text">Branch Details</span>
+              <a class="nav-link" href="{{url_for('admin.dashboardAddAgent')}}">
+                <i class="ni ni-fat-add text-yellow"></i>
+                <span class="nav-link-text">Add Agent</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="{{url_for('admin.dashboardAddEmp')}}">
+                <i class="ni ni-fat-add text-green"></i>
+                <span class="nav-link-text">Add Employee</span>
               </a>
             </li>
           </ul>
@@ -100,7 +106,7 @@
                 <div class="dropdown-header noti-title">
                   <h6 class="text-overflow m-0">Welcome!</h6>
                 </div>
-                <a href="{{url_for('shareholders.dashboard')}}" class="dropdown-item">
+                <a href="{{url_for('admin.dashboard')}}" class="dropdown-item">
                   <i class="ni ni-single-02"></i>
                   <span>My profile</span>
                 </a>
@@ -122,12 +128,12 @@
         <div class="header-body">
           <div class="row align-items-center py-4">
             <div class="col-lg-6 col-7">
-              <h6 class="h2 text-white d-inline-block mb-0">Shareholder</h6>
+              <h6 class="h2 text-white d-inline-block mb-0">Register Employee</h6>
               <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
                 <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
                   <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li>
                   <li class="breadcrumb-item"><a href="#">Insure-X</a></li>
-                  <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                  <li class="breadcrumb-item active" aria-current="page">AddEmployee</li>
                 </ol>
               </nav>
             </div>
@@ -144,92 +150,127 @@
             <div class="card-header">
               <div class="row align-items-center">
                 <div class="col-8">
-                  <h3 class="mb-0">
-                    Profile 
-                  </h3>
+                  <h3 class="mb-0">Add Employee </h3>
                 </div>
               </div>
             </div>
-            {%with shareProfile=shareUserProfile%}
-            <div class="card-body">
-                <h6 class="heading-small text-muted mb-4">Account Information</h6>
+            <form action="/addStaff" method="POST">
+            <div class="card-body"> 
+              {% with messages = get_flashed_messages(category_filter=["message"]) %}
+              {% if messages %}
+                <div class="alert alert-danger">
+                  {{ messages[0] }}
+                </div>
+              {% endif %}
+              {% endwith %}
+              {% with messages = get_flashed_messages(category_filter=["success"]) %}
+              {% if messages %}
+                <div class="alert alert-success">
+                  {{ messages[0] }}
+                </div>
+              {% endif %}
+              {% endwith %}
+              {% with messages = get_flashed_messages() %}
+              {% endwith %}
+                <h6 class="heading-small text-muted mb-4">Account information</h6>
                 <div class="pl-lg-4">
                   <div class="row">
-                    <div class="col-lg-3">
-                      
-                        Username 
-                      
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-username">Username</label>
+                        <input type="text" id="input-username" class="form-control" placeholder="Username" minlength="3" maxlength="12" required name="username">
+                      </div>
                     </div>
-                    <div class="col-lg-1">
-                      
-                      : 
-                  
-                    </div>
-                    <div class="col-lg-8">
-                      
-                        {{shareProfile[0]}} 
-                    
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-email" data-validate = "Valid email is required: ex@abc.xyz">Email address</label>
+                        <input type="email" id="input-email" class="form-control" placeholder="jesse@example.com" required name="email">
+                      </div>
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-lg-3">
-                      
-                        Email 
-                      
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-phone">Phone</label>
+                        <input type="text" id="input-phone" class="form-control" placeholder="9899901910" pattern="[0-9]{10}" required name="phone">
+                      </div>
                     </div>
-                    <div class="col-lg-1">
-                      
-                      : 
-                  
-                    </div>
-                    <div class="col-lg-8">
-                      
-                        {{shareProfile[2]}} 
-                    
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-pass">Password</label>
+                        <input type="password" id="input-pass" class="form-control" required name="password" minlength="4">
+                      </div>
                     </div>
                   </div>
-                  
-              </div>
-              <hr class="my-4" />
-              <h6 class="heading-small text-muted mb-4">Shareholder Information</h6>
+                </div>
+                <hr class="my-4" />
+                <!-- Address -->
+                <h6 class="heading-small text-muted mb-4">Personal Information</h6>
                 <div class="pl-lg-4">
                   <div class="row">
-                    <div class="col-lg-3">
-                      
-                        Shareholder Name 
-                      
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-name">Full Name</label>
+                        <input id="input-name" class="form-control" placeholder="Ayaan Kakkar" type="text" required name="name" pattern="^[A-Za-z]+\s[A-Za-z]+$" minlength="3">
+                      </div>
                     </div>
-                    <div class="col-lg-1">
-                      
-                      : 
-                  
-                    </div>
-                    <div class="col-lg-8">
-                      
-                        {{shareProfile[3]}} 
-                    
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-salary">Salary</label>
+                        <input type="text" id="input-salary" class="form-control" placeholder="30000" name="salary" required pattern="[0-9]+" maxlength="15" minlength="2">
+                      </div>
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-lg-3">
-                      
-                        Equity Percentage
-                      
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-aadhar">Aadhar No</label>
+                        <input type="text" id="input-aadhar" class="form-control" placeholder="783800010213" pattern="[0-9]{12}" minlength="12" maxlength="12" required name="aadhar" >
+                      </div>
                     </div>
-                    <div class="col-lg-1">
-                      
-                      : 
-                  
-                    </div>
-                    <div class="col-lg-8">
-                      
-                        {{shareProfile[4]}} 
-                    
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-pan">PAN</label>
+                        <input type="text" id="input-pan" class="form-control" placeholder="4562178020" minlength="10" maxlength="10" pattern="[0-9]{10}" required name="pan">
+                      </div>
                     </div>
                   </div>
-                 {% endwith %} 
-              </div>      
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-department">Department</label>
+                        <input type="text" id="input-department" class="form-control" maxlength="15" name="dept">
+                      </div>
+                    </div>
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-position">Position</label>
+                        <input type="text" id="input-position" class="form-control" maxlength="15" name="pos">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-branch">Branch</label>
+                        <select id="input-branch" class="form-control" name="branch" required>
+                          {% with branches=branchDetails%}
+                          {% for branch in branches %}
+                            <option value="{{branch[5]}}">{{branch[0]}}</option>
+                          {% endfor %}
+                          {% endwith %}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
             </div>
+            <div class="card-footer py-4"> 
+              <div class="col-12 text-right">
+                <button class="btn btn-primary">Register</a>
+              </div>       
+            </div>
+            </form>
           </div>
         </div>
       </div>
@@ -270,6 +311,7 @@
   <script src="/static/assets/vendor/chart.js/dist/Chart.extension.js"></script>
   <!-- Argon JS -->
   <script src="/static/assets/js/argon.js?v=1.2.0"></script>
+  
 </body>
 
 </html>

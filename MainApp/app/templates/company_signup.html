@@ -140,7 +140,7 @@
 			
 				<form validate-form" action="/company_signup" method="POST">
 					<span class="login100-form-title">
-						Company Sign up
+						Apply For Collaboration
 					</span>
 					
 					{% with messages = get_flashed_messages() %}
@@ -151,12 +151,28 @@
 					{% endif %}
 					{% endwith %}
 					
+					
+					<div class="wrap-input100 validate-input" data-validate = "Username is required">
+						<input class="input100 input-center" type="text" minlength="3" maxlength="12" name="username" placeholder="Username" required>
+						<span class="focus-input100 input-span"></span>
+						<span class="symbol-input100 input-span">
+							<i class="fa fa-user-circle" aria-hidden="true"></i>
+						</span>
+					</div>
 
 					<div class="wrap-input100 validate-input" data-validate = "Name is required">
 						<input class="input100 input-center" minlength="3" type="text" name="name" placeholder="Company Name" required title="Enter Your Company's Name.">
 						<span class="focus-input100 input-span"></span>
 						<span class="symbol-input100 input-span">
 							<i class="fa fa-user" aria-hidden="true"></i>
+						</span>
+					</div>
+
+					<div class="wrap-input100 validate-input" data-validate = "Password is required">
+						<input class="input100 input-center" type="password" name="password" minlength="4" placeholder="Password" title="Password should be at least 4 characters long" required>
+						<span class="focus-input100 input-span"></span>
+						<span class="symbol-input100 input-span">
+							<i class="fa fa-lock" aria-hidden="true"></i>
 						</span>
 					</div>
 
@@ -169,8 +185,8 @@
 					</div>
 
 
-					<div class="wrap-input100 validate-input" data-validate = "Password is required">
-						<input class="input100 input-center" type="password" name="password" minlength="4" placeholder="Password" title="Password should be at least 4 characters long" required>
+					<div class="wrap-input100 validate-input" data-validate = "Valid Registration No is required">
+						<input class="input100 input-center" type="text" name="regNo" minlength="4" maxlength="20" pattern="[0-9]+" placeholder="Company Registration No" title="Registration number should be at least 4 characters long" required>
 						<span class="focus-input100 input-span"></span>
 						<span class="symbol-input100 input-span">
 							<i class="fa fa-lock" aria-hidden="true"></i>

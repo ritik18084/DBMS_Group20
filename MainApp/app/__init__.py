@@ -6,11 +6,13 @@ db = mysql.connector.connect(
   host="localhost",
   user="root",
   passwd="",
-  database="dbms"
+  database="testDatabase"
 )
 
+app = None
 
 def create_app():
+    global app
     app = Flask(__name__)
     app.secret_key = urandom(24)
     

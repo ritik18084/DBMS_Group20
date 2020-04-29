@@ -1,5 +1,5 @@
 from flask import Blueprint, session, request, redirect, url_for, render_template
-from . import db
+from . import db, app
 from .auth import userLoggedIn,userType
 from datetime import datetime
 
@@ -30,18 +30,6 @@ def dashboardBranch():
         return
     return render_template('shareholders/branch.html')   
 
-@shareholders.route('/activeInsurances', methods= ['POST'])
-def activeInsurances():
-    if not(userLoggedIn() and userType('shareholders')):
-        return
-    dbCursor = db.cursor()
-    currDate = datetime.today().strftime('%Y-%m-%d')
-    sql = "SELECT COUNT(*) AS count FROM insurance_database WHERE end_date > %s"
-    val = (currDate, )
-    dbCursor.execute(sql, val)
-    res = dbCursor.fetchOne()
-    dbCursor.close()
-    return res
 
 @shareholders.app_context_processor
 def activeInsuranceCounts():
@@ -120,7 +108,6 @@ def annualProfit(year):
     val = (endDate, startDate, startDate, endDate, startDate, startDate, endDate, endDate, startDate, endDate, endDate)
     dbCursor.execute(sql, val)
     res = dbCursor.fetchone()
-    print(res)
     dbCursor.close()
     return res
 
@@ -140,15 +127,12 @@ def netProfit():
     return {'netProfit' : (int(res[0]),)}
 
 @shareholders.context_processor
-def viewShareProfile():
-    # if not(userLoggedIn() and userType('shareholders')):
-    #     return
+def shareUserProfile():
     dbCursor = db.cursor()
     sql = "SELECT equity_percentage, share_name FROM shareholders_database WHERE share_ID = %s"
     val = (session['id'], )
     dbCursor.execute(sql, val)
     res = dbCursor.fetchone()
     dbCursor.close()
-    return {'shareUserProfile' : [session['username'], session['phone'], session['email'], res[1], res[0]]}
-
+    return {'shareUserProfile' : [session['username'], session['email'], res[1], res[0]]}
 

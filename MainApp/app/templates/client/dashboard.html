@@ -35,29 +35,43 @@
           <!-- Nav items -->
           <ul class="navbar-nav">
             <li class="nav-item">
-              <a class="nav-link active" href="{{url_for('shareholders.dashboard')}}">
+              <a class="nav-link active" href="{{url_for('client.dashboard')}}">
                 <i class="ni ni-tv-2 text-primary"></i>
                 <span class="nav-link-text">Dashboard</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{url_for('shareholders.dashboardProfit')}}">
-                <i class="ni ni-trophy text-orange"></i>
-                <span class="nav-link-text">Profit</span>
+              <a class="nav-link" href="{{url_for('client.dashboardInsurances')}}">
+                <i class="ni ni-atom text-green"></i>
+                <span class="nav-link-text">My Insurance</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{url_for('shareholders.dashboardStats')}}">
-                <i class="ni ni-chart-pie-35 text-primary"></i>
-                <span class="nav-link-text">Statistics</span>
+              <a class="nav-link" href="{{url_for('client.dashboardViewPolicies')}}">
+                <i class="ni ni-bag-17 text-yellow"></i>
+                <span class="nav-link-text">Policies</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{url_for('shareholders.dashboardBranch')}}">
-                <i class="ni ni-square-pin text-yellow"></i>
-                <span class="nav-link-text">Branch Details</span>
+              <a class="nav-link" href="{{url_for('client.dashboardBuy')}}">
+                <i class="ni ni-cart text-primary"></i>
+                <span class="nav-link-text">Buy Insurance</span>
               </a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{url_for('client.dashboardPayDues')}}">
+                <i class="ni ni-world text-orange"></i>
+                <span class="nav-link-text">Pay Dues</span>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" href="{{url_for('client.dashboardHistory')}}">
+                <i class="ni ni-archive-2 text-purple"></i>
+                <span class="nav-link-text">Transaction History</span>
+              </a>
+            </li>
+            
           </ul>
           <!-- Divider -->
         </div>
@@ -100,7 +114,7 @@
                 <div class="dropdown-header noti-title">
                   <h6 class="text-overflow m-0">Welcome!</h6>
                 </div>
-                <a href="{{url_for('shareholders.dashboard')}}" class="dropdown-item">
+                <a href="{{url_for('client.dashboard')}}" class="dropdown-item">
                   <i class="ni ni-single-02"></i>
                   <span>My profile</span>
                 </a>
@@ -122,7 +136,7 @@
         <div class="header-body">
           <div class="row align-items-center py-4">
             <div class="col-lg-6 col-7">
-              <h6 class="h2 text-white d-inline-block mb-0">Shareholder</h6>
+              <h6 class="h2 text-white d-inline-block mb-0">Client</h6>
               <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
                 <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
                   <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li>
@@ -150,14 +164,13 @@
                 </div>
               </div>
             </div>
-            {%with shareProfile=shareUserProfile%}
             <div class="card-body">
                 <h6 class="heading-small text-muted mb-4">Account Information</h6>
                 <div class="pl-lg-4">
                   <div class="row">
                     <div class="col-lg-3">
                       
-                        Username 
+                        Username
                       
                     </div>
                     <div class="col-lg-1">
@@ -167,7 +180,24 @@
                     </div>
                     <div class="col-lg-8">
                       
-                        {{shareProfile[0]}} 
+                        {{clientInfo[0]}} 
+                    
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-3">
+                      
+                        Phone
+                      
+                    </div>
+                    <div class="col-lg-1">
+                      
+                      : 
+                  
+                    </div>
+                    <div class="col-lg-8">
+                      
+                        {{clientInfo[1]}} 
                     
                     </div>
                   </div>
@@ -184,19 +214,37 @@
                     </div>
                     <div class="col-lg-8">
                       
-                        {{shareProfile[2]}} 
+                        {{clientInfo[2]}} 
                     
                     </div>
                   </div>
+                  {% if offerValid %}
+                  <div class="row">
+                    <div class="col-lg-3">
+                      
+                        Discount 
+                      
+                    </div>
+                    <div class="col-lg-1">
+                      
+                      : 
                   
+                    </div>
+                    <div class="col-lg-8">
+                      
+                        {{offerDiscount[0]}} 
+                    
+                    </div>
+                  </div>
+                  {% endif %}
               </div>
               <hr class="my-4" />
-              <h6 class="heading-small text-muted mb-4">Shareholder Information</h6>
+              <h6 class="heading-small text-muted mb-4">Personal Information</h6>
                 <div class="pl-lg-4">
                   <div class="row">
                     <div class="col-lg-3">
                       
-                        Shareholder Name 
+                        Name 
                       
                     </div>
                     <div class="col-lg-1">
@@ -206,14 +254,14 @@
                     </div>
                     <div class="col-lg-8">
                       
-                        {{shareProfile[3]}} 
+                        {{clientInfo[3]}} 
                     
                     </div>
                   </div>
                   <div class="row">
                     <div class="col-lg-3">
                       
-                        Equity Percentage
+                        Aadhar No
                       
                     </div>
                     <div class="col-lg-1">
@@ -223,11 +271,164 @@
                     </div>
                     <div class="col-lg-8">
                       
-                        {{shareProfile[4]}} 
+                        {{clientInfo[4]}} 
                     
                     </div>
                   </div>
-                 {% endwith %} 
+                  <div class="row">
+                    <div class="col-lg-3">
+                      
+                        PAN
+                      
+                    </div>
+                    <div class="col-lg-1">
+                      
+                      : 
+                  
+                    </div>
+                    <div class="col-lg-8">
+                      
+                        {{clientInfo[5]}} 
+                    
+                    </div>
+                    
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-3">
+                      
+                        DOB
+                      
+                    </div>
+                    <div class="col-lg-1">
+                      
+                      : 
+                  
+                    </div>
+                    <div class="col-lg-8">
+                      
+                        {{clientInfo[6]}} 
+                    
+                    </div>
+                    
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-3">
+                      
+                        Age
+                      
+                    </div>
+                    <div class="col-lg-1">
+                      
+                      : 
+                  
+                    </div>
+                    <div class="col-lg-8">
+                      
+                        {{clientInfo[7]}} 
+                    
+                    </div>
+                    
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-3">
+                      
+                        Sex
+                      
+                    </div>
+                    <div class="col-lg-1">
+                      
+                      : 
+                  
+                    </div>
+                    <div class="col-lg-8">
+                      
+                        {{clientInfo[8]}} 
+                    
+                    </div>
+                    
+                  </div>
+                  
+                  
+              </div>
+              <hr class="my-4" />
+              <h6 class="heading-small text-muted mb-4">Agent Information</h6>
+                <div class="pl-lg-4">
+                  <div class="row">
+                    <div class="col-lg-3">
+                      
+                        Agent Name 
+                      
+                    </div>
+                    <div class="col-lg-1">
+                      
+                      : 
+                  
+                    </div>
+                    <div class="col-lg-8">
+                      
+                        {{clientInfo[9]}} 
+                    
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-lg-3">
+                      
+                        Agent Phone 
+                      
+                    </div>
+                    <div class="col-lg-1">
+                      
+                      : 
+                  
+                    </div>
+                    <div class="col-lg-8">
+                      
+                        {{clientInfo[10]}} 
+                    
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-lg-3">
+                      
+                        Agent Email
+                      
+                    </div>
+                    <div class="col-lg-1">
+                      
+                      : 
+                  
+                    </div>
+                    <div class="col-lg-8">
+                      
+                        {{clientInfo[11]}} 
+                    
+                    </div>
+                  </div>   
+        
+                </div>
+                <hr class="my-4" />
+              <h6 class="heading-small text-muted mb-4">Branch Information</h6>
+                <div class="pl-lg-4">
+                  <div class="row">
+                    <div class="col-lg-3">
+                      
+                        Branch 
+                      
+                    </div>
+                    <div class="col-lg-1">
+                      
+                      : 
+                  
+                    </div>
+                    <div class="col-lg-8">
+                      
+                        {{clientInfo[12]}} 
+                    
+                    </div>
+                  </div>   
+        
               </div>      
             </div>
           </div>

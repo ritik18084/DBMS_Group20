@@ -4,42 +4,86 @@ from .auth import userLoggedIn,userType
 
 agent = Blueprint('agent',__name__)
 
-@agent.route('/viewsold', methods= ['POST'])
+
+@agent.route('/agentDashboard')
+def dashboard():
+    if not(userLoggedIn() and userType('agent')):
+        return
+    return render_template('agent/dashboard.html')
+
+@agent.route('/agentClients')
+def dashboardClients():
+    if not(userLoggedIn() and userType('agent')):
+        return
+    return render_template('agent/clientInfo.html')
+
+@agent.route('/agentPolicies')
+def dashboardPolicies():
+    if not(userLoggedIn() and userType('agent')):
+        return
+    return render_template('agent/policies.html')
+
+
+@agent.context_processor
 def viewsold():
     if not(userLoggedIn() and userType('agent')):
         return
     dbCursor = db.cursor()
-    sql = "SELECT ins_type FROM INSURANCE_DATABASE WHERE agent_ID=%s"
+    sql = "SELECT A.client_name, B.client_ph, B.client_email ,A.ins_type, A.start_date, A.duration FROM INSURANCE_DATABASE A, CLIENT_DATABASE B WHERE A.agent_ID=%s AND A.client_ID=B.client_ID"
     val = (session['id'],)
     dbCursor.execute(sql, val)
     res = dbCursor.fetchall()
     dbCursor.close()
-    return res
+    return {'agentPoliciesSold' : res}
 
-@agent.route('/viewagentprofile', methods= ['POST'])
+@agent.context_processor
+def viewCountSold():
+    if not(userLoggedIn() and userType('agent')):
+        return
+    dbCursor = db.cursor()
+    sql = "SELECT COUNT(*) FROM INSURANCE_DATABASE WHERE agent_ID=%s"
+    val = (session['id'],)
+    dbCursor.execute(sql, val)
+    res = dbCursor.fetchone()[0]
+    dbCursor.close()
+    return {'agentCountSold' : res}
+
+@agent.context_processor
 def viewagentprofile():
     if not(userLoggedIn() and userType('agent')):
         return
     dbCursor = db.cursor()
     sql = "SELECT * FROM AGENT_DATABASE WHERE agent_ID=%s"
-    val = (session['id'])
+    val = (session['id'],)
     dbCursor.execute(sql, val)
     res = dbCursor.fetchone()
     dbCursor.close()
-    return res
+    return {'agentProfile' : [session['username'], res[1], session['email'], res[0], res[3], res[6]]}
 
-@agent.route('/getClientContact', methods= ['POST'])
-
+@agent.context_processor
 def getClientContact():
     if not(userLoggedIn() and userType('agent')):
         return
     dbCursor = db.cursor()
     sql = "SELECT client_name, client_ph, client_email \
-    FROM AGENT_DATABASE WHERE agent_ID= %s and client_ID = %s"
+    FROM CLIENT_DATABASE WHERE agent_ID= %s"
     agent_ID = session['id']
-    client_ID = session['id']
-    val = (agent_ID,client_ID)
+    val = (agent_ID,)
     dbCursor.execute(sql, val)
     res= dbCursor.fetchall()
     dbCursor.close()
-    return res
+    return {'agentClientContact' : res}
+
+@agent.context_processor
+def getClientCount():
+    if not(userLoggedIn() and userType('agent')):
+        return
+    dbCursor = db.cursor()
+    sql = "SELECT COUNT(*)" \
+    "FROM CLIENT_DATABASE WHERE agent_ID= %s"
+    agent_ID = session['id']
+    val = (agent_ID, )
+    dbCursor.execute(sql, val)
+    res= dbCursor.fetchone()[0]
+    dbCursor.close()
+    return {'agentClientCount' : res}

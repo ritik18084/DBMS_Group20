@@ -7,6 +7,11 @@ auth = Blueprint('auth',__name__)
 
 
 def generateUID(length=12):
+    if length<10:
+        uid = ""
+        while len(uid) < length:
+            uid = uid + str(randint(0,9))
+        return uid
     uid = str(int(time.time()))
     while len(uid) < length:
         uid = uid + str(randint(0,9))
@@ -15,7 +20,7 @@ def generateUID(length=12):
 @auth.route('/login')
 def loginPage():
     if userLoggedIn():
-        return redirect(url_for('shareholders.dashboard'))
+        return redirect(url_for('client.dashboard'))
     return render_template('login.html')
 
 @auth.route('/signup')
@@ -24,11 +29,12 @@ def signupPage():
         return redirect(url_for('main.index'))
     return render_template('signup.html')
 
-@auth.route('/company_signup')
-def company_signup_Page():
-	if userLoggedIn():
-		return redirect(url_for('main.index'))
-	return render_template('company_signup.html')
+
+@auth.route('/companySignup')
+def companySignup():
+    if userLoggedIn():
+        return redirect(url_for('main.index'))
+    return render_template('company_signup.html')
 
 @auth.route('/logout')
 def logout():
@@ -50,26 +56,36 @@ def signup():
     if userLoggedIn():
         return redirect(url_for('main.index'))
     if validateSignupRequest(request.form):
-        if userExists(request.form):
-            return redirect(url_for('auth.loginPage'))
         addUser(request.form, tp="client")
         loginUser(request.form['email'])
         return redirect(url_for('main.index'))
-    return redirect(url_for('auth.signupPage'))    
+    return redirect(url_for('auth.signupPage'))        
 
-###########
+
 @auth.route('/company_signup', methods= ['POST'])
 def company_signup():
     if userLoggedIn():
         return redirect(url_for('main.index'))
     if validateCompanySignupRequest(request.form):
-        if companyExists(request.form):
-            return redirect(url_for('auth.loginPage'))
-        addUserCompany(request.form, tp="company")
+        addUser(request.form, tp="organizations")
         loginUser(request.form['email'])
-        return redirect(url_for('main.index'))  ##Change this to dashboard of company
-    return redirect(url_for('auth.company_signup_Page')) 
+        return openDashboard() 
+    return redirect(url_for('auth.company_signup_Page'))
 
+
+def openDashboard():
+    if userType('client'):
+        return redirect(url_for('client.dashboard'))
+    if userType('shareholders'):
+        return redirect(url_for('shareholders.dashboard'))
+    if userType('agent'):
+        return redirect(url_for('agent.dashboard'))
+    if userType('staff'):
+        return redirect(url_for('staff.dashboard'))
+    if userType('organizations'):
+        return redirect(url_for('organizations.dashboard'))
+    if userType('admin'):
+        return redirect(url_for('admin.dashboard'))
 
 def addClient(requestForm):
     dbCursor = db.cursor()
@@ -104,46 +120,64 @@ def getGender(gender):
 def userLoggedIn():
     return ('loggedIn' in session)
 
-def userType(type):
-    return True
+def userType(userType):
+    return (session['userType'] == userType)
 
 def loginUser(email):
     session['loggedIn'] = True
     session['email'] = email
-    session['id'] = getUserID(email)
-    session['username'] = getUsername(email)
-    session['phone'] = getPhone(email)
+    session['id'], session['username'], session['userType'] = getUserInfo(email)
 
-def getUsername(email):
+def getUserInfo(email):
     dbCursor = db.cursor()
-    sql = "SELECT username FROM login_database WHERE email = %s"
+    sql = "SELECT user_type, username FROM login_database WHERE email = %s"
     val = (email, )
     dbCursor.execute(sql,val)
-    res = dbCursor.fetchone()[0]
+    res = dbCursor.fetchone()
+    usertype = res[0]
+    username = res[1]
+    userId = 0
+    if usertype == 'client':
+        sql = "SELECT client_ID FROM client_database WHERE client_email = %s"
+        val = (email,)
+        dbCursor.execute(sql,val)
+        userID = dbCursor.fetchone()[0]
+    elif usertype == 'staff':
+        sql = "SELECT employee_ID FROM staff_database WHERE employee_email = %s"
+        val = (email,)
+        dbCursor.execute(sql,val)
+        userID = dbCursor.fetchone()[0]
+    elif usertype == 'agent':
+        sql = "SELECT agent_ID FROM agent_database WHERE agent_email = %s"
+        val = (email,)
+        dbCursor.execute(sql,val)
+        userID = dbCursor.fetchone()[0]
+    elif usertype == 'shareholders':
+        sql = "SELECT share_ID FROM shareholders_database WHERE share_email = %s"
+        val = (email,)
+        dbCursor.execute(sql,val)
+        userID = dbCursor.fetchone()[0]
+    elif usertype == 'organizations':
+        sql = "SELECT company_ID FROM company_database WHERE company_email = %s"
+        val = (email,)
+        dbCursor.execute(sql,val)
+        userID = dbCursor.fetchone()[0]
+
     dbCursor.close()
-    return res
+    return userID, username, usertype
 
-def getPhone(email):
+
+def addUser(requestForm, tp=""):
     dbCursor = db.cursor()
-    sql = "SELECT phone FROM login_database WHERE email = %s"
-    val = (email, )
-    dbCursor.execute(sql,val)
-    res = dbCursor.fetchone()[0]
-    dbCursor.close()
-    return res
-
-def getUserID(email):
-    return '997723'
-
-def addUser(requestForm, tp):
-    dbCursor = db.cursor()
-    sql = "INSERT INTO login_database (username, password, email, phone) VALUES (%s, %s, %s, %s) "
-    val = (requestForm['username'], requestForm['password'], requestForm['email'], requestForm['phone'])
+    sql = "INSERT INTO login_database (username, password, email, phone, user_type) VALUES (%s, %s, %s, %s, %s) "
+    val = (requestForm['username'], requestForm['password'], requestForm['email'], requestForm['phone'], tp)
     dbCursor.execute(sql, val)
     db.commit()
     dbCursor.close()
     if tp=='client':
         addClient(requestForm)
+    if tp=='organizations':
+        addCompany(requestForm)
 
 def validLogin(email, password):
     dbCursor = db.cursor()
@@ -155,15 +189,6 @@ def validLogin(email, password):
     return res
 
 
-def userExists(requestForm):
-    dbCursor = db.cursor()
-    sql = "SELECT * FROM login_database WHERE username = %s OR email = %s OR phone = %s"
-    val = (requestForm['username'], requestForm['email'], requestForm['phone'])
-    dbCursor.execute(sql, val)
-    res = True if dbCursor.fetchone() else False
-    dbCursor.close()
-    return res
-
 def validateSignupRequest(formData):
     return (checkNotPresent('username',formData['username'], 'login_database', 'Username already in use') 
         and checkNotPresent('email',formData['email'], 'login_database', 'Email already in use')
@@ -172,29 +197,20 @@ def validateSignupRequest(formData):
         and checkNotPresent('client_PAN',formData['pan'], 'client_database', 'PAN number already linked to another account')
     ) 
 
+############
 
-######################
 #COMPANY SIGNUP
 def validateCompanySignupRequest(formData):
-    return (checkNotPresent('email',formData['email'], 'login_database', 'Email already in use')
+    return ( checkNotPresent('username',formData['username'], 'login_database', 'Username already in use')
+        and checkNotPresent('email',formData['email'], 'login_database', 'Email already in use')
         and checkNotPresent('phone',formData['phone'], 'login_database', 'Phone already in use')
-        and checkNotPresent('company_name',formData['name'], 'company_database', 'This company is already registered')
+        and checkNotPresent('company_reg_no',formData['regNo'], 'company_database', 'Registration no linked to another account')
     )
-
-def addUserCompany(requestForm, tp):
-    dbCursor = db.cursor()
-    sql = "INSERT INTO login_database (username, password, email, phone) VALUES (%s, %s, %s, %s) "
-    val = (requestForm['name'][:11], requestForm['password'], requestForm['email'], requestForm['phone'])
-    dbCursor.execute(sql, val)
-    db.commit()
-    dbCursor.close()
-    if tp=='company':
-        addCompany(requestForm)
 
 def addCompany(requestForm):
     dbCursor = db.cursor()
     sql = "INSERT INTO company_database VALUES (%s, %s, %s, %s, %s, %s, 0, %s, %s, %s)"
-    val = (requestForm['name'], generateUID(8), 
+    val = (requestForm['name'], requestForm['regNo'], 
     requestForm['email'], requestForm['collab_type'],
     requestForm['duration'],requestForm['phone'], 
     requestForm['discount'], requestForm['type'],
@@ -203,17 +219,9 @@ def addCompany(requestForm):
     db.commit()
     dbCursor.close()
 
-def companyExists(requestForm):
-    dbCursor = db.cursor()
-    sql = "SELECT * FROM login_database WHERE username = %s OR email = %s OR phone = %s"
-    val = (requestForm['name'], requestForm['email'], requestForm['phone'])
-    dbCursor.execute(sql, val)
-    res = True if dbCursor.fetchone() else False
-    dbCursor.close()
-    return res
 
+############
 
-#################################
 def checkNotPresent(attr, val, table, flashMessage=""):
     dbCursor = db.cursor()
     sql = "SELECT * FROM " + table + " WHERE " + attr + " = %s"
@@ -224,3 +232,5 @@ def checkNotPresent(attr, val, table, flashMessage=""):
     if len(flashMessage)>0 and not res:
         flash(flashMessage)
     return res
+
+
